@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teotia Shopprix for all | Standalone HTML Amazon eCommerce UI</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amazonDark: '#131921',
+            amazonNav: '#232f3e',
+            amazonYellow: '#ffd814',
+            amazonOrange: '#febd69',
+            amazonBadge: '#f08804'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar & Animations */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark ::-webkit-scrollbar-track { background: #0f172a; }
+    .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.3s ease-out forwards; }
+    @keyframes slideRight { from { transform: translateX(-100%); } to { transform: translateX(0); } }
+    .animate-slideRight { animation: slideRight 0.3s ease-out forwards; }
+  </style>
+</head>
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- ==================== HEADER (#131921 & #232f3e) ==================== -->
+  <header class="sticky top-0 z-40 shadow-lg">
+    <!-- Top Bar (#131921 Dark Navy) -->
+    <div class="bg-[#131921] text-white px-3 sm:px-6 py-2 flex items-center justify-between gap-2 md:gap-4 border-b border-slate-800">
+      
+      <!-- Left: Logo & Location -->
+      <div class="flex items-center gap-4 shrink-0">
+        <div onclick="navigateTo('home')" class="cursor-pointer flex flex-col group py-1 border border-transparent hover:border-white px-1.5 rounded transition-all">
+          <div class="flex items-baseline gap-1">
+            <span class="font-extrabold text-xl sm:text-2xl tracking-tighter text-white">
+              Teotia <span class="text-[#febd69]">Shopprix</span>
+            </span>
+            <span class="text-[10px] bg-amber-500 text-slate-950 font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">for all</span>
+          </div>
+          <div class="h-0.5 bg-gradient-to-r from-[#febd69] via-[#ff9900] to-transparent w-full mt-0.5 rounded-full"></div>
+        </div>
+
+        <button onclick="openModal('locationModal')" class="hidden md:flex items-center gap-1.5 border border-transparent hover:border-white p-1.5 rounded transition-all cursor-pointer text-left">
+          <span class="text-amber-400 font-bold text-lg">📍</span>
+          <div>
+            <span class="text-[11px] text-slate-300 font-medium block leading-none" id="headerCity">Delivering to New Delhi</span>
+            <span class="text-xs sm:text-sm font-bold text-white leading-tight flex items-center gap-1" id="headerPincode">110001 • Update location ▼</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Center: Amazon Search Bar -->
+      <div class="flex-1 max-w-3xl relative mx-1 sm:mx-2">
+        <form onsubmit="handleSearch(event)" class="flex h-10 sm:h-11 rounded-md overflow-hidden ring-2 ring-transparent focus-within:ring-[#febd69] bg-white text-slate-900 shadow-inner">
+          <select id="searchCategorySelect" onchange="handleCategorySelectChange()" class="hidden lg:block bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3 py-2 border-r border-slate-300 focus:outline-none cursor-pointer max-w-[140px]">
+            <option value="all">All Departments</option>
+            <option value="electronics">Electronics</option>
+            <option value="fashion">Fashion</option>
+            <option value="grocery">Grocery</option>
+            <option value="home-kitchen">Home & Kitchen</option>
+            <option value="books">Books</option>
+            <option value="beauty">Beauty</option>
+          </select>
+          <input type="text" id="searchInput" oninput="showSearchSuggestions()" placeholder="Search Teotia Shopprix for iPhones, Trench coats, Organic Almonds..." class="flex-1 px-3 sm:px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none bg-white w-full" />
+          <button type="submit" class="bg-[#febd69] hover:bg-[#f3a847] px-4 sm:px-5 flex items-center justify-center text-slate-900 font-bold text-lg transition-colors cursor-pointer" title="Search">🔍</button>
+        </form>
+
+        <!-- Auto-suggestions dropdown -->
+        <div id="searchSuggestionsBox" class="hidden absolute top-full left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50 divide-y divide-slate-100 dark:divide-slate-700"></div>
+      </div>
+
+      <!-- Right: Admin, Account, Returns, Cart -->
+      <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+        <button onclick="navigateTo('admin')" class="hidden sm:flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/40 px-2.5 py-1.5 rounded-md text-xs font-bold transition-all cursor-pointer">
+          <span>⚡ Admin</span>
+        </button>
+
+        <!-- Account Dropdown Trigger -->
+        <div class="relative border border-transparent hover:border-white p-1 sm:p-1.5 rounded transition-all cursor-pointer" onmouseenter="toggleAccountMenu(true)" onmouseleave="toggleAccountMenu(false)" onclick="navigateTo('admin')">
+          <span class="text-[11px] text-slate-300 block leading-none" id="headerUserGreeting">Hello, Vikram</span>
+          <span class="text-xs sm:text-sm font-bold text-white flex items-center gap-0.5 leading-tight">Account & Lists ▼</span>
+          
+          <div id="accountDropdown" class="hidden absolute top-full right-0 mt-1 w-60 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 p-4 text-slate-800 dark:text-slate-200 z-50 animate-fadeIn">
+            <div class="text-center pb-3 border-b border-slate-200 dark:border-slate-700" id="accountDropdownAuthArea"></div>
+            <div class="pt-3 space-y-2 text-xs font-semibold">
+              <div onclick="event.stopPropagation(); navigateTo('wishlist')" class="hover:text-amber-500 cursor-pointer flex items-center gap-2">💖 Your Wishlist (<span id="wishlistCountDropdown">2</span>)</div>
+              <div onclick="event.stopPropagation(); navigateTo('orders')" class="hover:text-amber-500 cursor-pointer flex items-center gap-2">📦 Your Orders</div>
+              <div onclick="event.stopPropagation(); navigateTo('admin')" class="hover:text-amber-500 cursor-pointer flex items-center gap-2">⚡ Manage Products (Admin)</div>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="navigateTo('orders')" class="hidden sm:block border border-transparent hover:border-white p-1.5 rounded transition-all cursor-pointer text-left">
+          <span class="text-[11px] text-slate-300 block leading-none">Returns</span>
+          <span class="text-xs sm:text-sm font-bold text-white leading-tight">& Orders</span>
+        </button>
+
+        <!-- Cart Badge -->
+        <button onclick="navigateTo('cart')" class="flex items-end gap-1 border border-transparent hover:border-white p-1 sm:p-1.5 rounded transition-all cursor-pointer relative">
+          <div class="relative text-2xl">
+            🛒
+            <span id="cartCountBadge" class="absolute -top-2 left-3.5 sm:left-4 bg-[#f08804] text-slate-950 font-extrabold text-xs px-1.5 py-0.2 rounded-full min-w-[20px] text-center shadow-sm">0</span>
+          </div>
+          <span class="font-bold text-xs sm:text-sm text-white hidden md:inline pb-1">Cart</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Secondary Nav (#232f3e Dark Slate) -->
+    <div class="bg-[#232f3e] dark:bg-[#0f172a] text-white px-3 sm:px-6 py-1.5 flex items-center justify-between text-xs sm:text-sm font-medium overflow-x-auto gap-4">
+      <div class="flex items-center gap-1 sm:gap-4 shrink-0">
+        <button onclick="openModal('megaMenuModal')" class="flex items-center gap-1.5 border border-transparent hover:border-white px-2 py-1 rounded font-bold transition-all cursor-pointer bg-white/10 sm:bg-transparent">
+          <span>☰ All</span>
+        </button>
+        <button onclick="selectCategoryFilter('all'); navigateTo('listing')" class="hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Shopprix mini TV</button>
+        <button onclick="selectCategoryFilter('all'); navigateTo('listing')" class="hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 font-bold text-amber-300 cursor-pointer">Today's Deals</button>
+        <button onclick="selectCategoryFilter('electronics'); navigateTo('listing')" class="hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Mobiles & Gadgets</button>
+        <button onclick="selectCategoryFilter('fashion'); navigateTo('listing')" class="hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Fashion & Lifestyle</button>
+        <button onclick="selectCategoryFilter('grocery'); navigateTo('listing')" class="hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Grocery & Gourmet</button>
+        <button onclick="selectCategoryFilter('home-kitchen'); navigateTo('listing')" class="hidden md:block hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Home & Kitchen</button>
+        <button onclick="selectCategoryFilter('books'); navigateTo('listing')" class="hidden lg:block hover:text-amber-400 border border-transparent hover:border-white px-2 py-1 rounded transition-all shrink-0 cursor-pointer">Books</button>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0">
+        <button onclick="toggleDarkMode()" id="darkModeBtn" class="p-1 hover:bg-white/10 rounded-full text-slate-300 hover:text-amber-400 transition-colors cursor-pointer" title="Toggle Dark/Light Mode">🌙</button>
+        <span onclick="navigateTo('listing')" class="hidden xl:flex items-center gap-1.5 text-amber-300 font-bold hover:underline cursor-pointer bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+          ✨ Big Sale Dhamaka - Free Express Delivery Over ₹499!
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN PAGE VIEWS ==================== -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6" id="mainContainer">
+    <!-- Views injected via JavaScript -->
+  </main>
+
+  <!-- ==================== MODALS & FLOATING WIDGETS ==================== -->
+  
+  <!-- Location Modal -->
+  <div id="locationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fadeIn">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+        <div class="flex items-center gap-2 text-slate-800 dark:text-white font-bold text-base">📍 Choose your delivery location</div>
+        <button onclick="closeModal('locationModal')" class="p-1 hover:bg-slate-100 rounded-full text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-600 dark:text-slate-300">Delivery options and speeds vary by location. Enter your city and pincode:</p>
+      <form onsubmit="applyLocationForm(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Enter Pincode</label>
+          <input type="text" id="locPincodeInput" value="110001" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white" required />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">City Name</label>
+          <input type="text" id="locCityInput" value="New Delhi" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-white" required />
+        </div>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 rounded-lg text-sm shadow-md mt-2">Apply Location</button>
+      </form>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-700">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Preset Metros</span>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="applyLocationPreset('New Delhi', '110001')" class="p-2 rounded border hover:border-amber-500 text-left font-medium">New Delhi (110001)</button>
+          <button onclick="applyLocationPreset('Mumbai', '400001')" class="p-2 rounded border hover:border-amber-500 text-left font-medium">Mumbai (400001)</button>
+          <button onclick="applyLocationPreset('Bangalore', '560001')" class="p-2 rounded border hover:border-amber-500 text-left font-medium">Bangalore (560001)</button>
+          <button onclick="applyLocationPreset('Hyderabad', '500001')" class="p-2 rounded border hover:border-amber-500 text-left font-medium">Hyderabad (500001)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mega Menu Drawer -->
+  <div id="megaMenuModal" class="hidden fixed inset-0 z-50 flex">
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity" onclick="closeModal('megaMenuModal')"></div>
+    <div class="relative w-80 max-w-[85vw] bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col z-10 animate-slideRight overflow-y-auto">
+      <div onclick="navigateTo('admin'); closeModal('megaMenuModal')" class="bg-[#232f3e] dark:bg-[#131921] text-white p-4 flex items-center justify-between sticky top-0 z-20 shadow-md cursor-pointer">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">👤</span>
+          <div>
+            <span class="text-xs font-semibold text-slate-300 block">Welcome to Teotia Shopprix</span>
+            <span class="text-base font-bold" id="megaMenuUserName">Hello, Vikram</span>
+          </div>
+        </div>
+        <button onclick="event.stopPropagation(); closeModal('megaMenuModal')" class="text-xl p-1">✕</button>
+      </div>
+
+      <div class="flex-1 py-3 divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 text-sm">
+        <div class="py-3 px-4">
+          <h3 class="font-extrabold text-base pb-2">Trending Now</h3>
+          <ul class="space-y-1 font-medium">
+            <li><button onclick="selectCategoryFilter('all'); navigateTo('listing'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex justify-between">🔥 Best Sellers <span>→</span></button></li>
+            <li><button onclick="selectCategoryFilter('all'); navigateTo('listing'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex justify-between">⚡ Today's Deals <span>→</span></button></li>
+          </ul>
+        </div>
+
+        <div class="py-3 px-4">
+          <h3 class="font-extrabold text-base pb-2">Shop By Category</h3>
+          <ul class="space-y-1 font-medium" id="megaMenuCategoriesList"></ul>
+        </div>
+
+        <div class="py-3 px-4">
+          <h3 class="font-extrabold text-base pb-2">Programs & Features</h3>
+          <ul class="space-y-1 font-medium">
+            <li><button onclick="navigateTo('cart'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2">🚚 Shopprix Express Free Shipping</button></li>
+            <li><button onclick="navigateTo('wishlist'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex items-center gap-2">💖 Your Wishlist & Gift Ideas</button></li>
+            <li><button onclick="navigateTo('admin'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-amber-50 dark:hover:bg-amber-950/40 rounded-lg font-bold text-amber-600 dark:text-amber-400 flex items-center justify-between"><span>⚡ Admin Control Panel</span><span class="text-xs bg-amber-500 text-slate-950 px-1.5 py-0.5 rounded">Demo</span></button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick View Modal -->
+  <div id="quickViewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-fadeIn">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-12 relative max-h-[90vh] overflow-y-auto" id="quickViewModalContent"></div>
+  </div>
+
+  <!-- ==================== FOOTER (#232f3e & #131921) ==================== -->
+  <footer class="mt-16 bg-[#232f3e] text-white">
+    <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="w-full bg-[#37475a] hover:bg-[#485769] text-white text-xs sm:text-sm font-semibold py-3 sm:py-4 transition-colors cursor-pointer text-center block shadow-inner">Back to top</button>
+
+    <div class="bg-[#192330] border-y border-slate-700/60 py-6 px-4">
+      <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="p-3"><span class="text-2xl block mb-1">🚚</span><span class="font-bold text-sm">Shopprix Express</span><span class="text-xs text-slate-400 block mt-1">Fast & FREE shipping over ₹499</span></div>
+        <div class="p-3"><span class="text-2xl block mb-1">🛡️</span><span class="font-bold text-sm">100% Protection</span><span class="text-xs text-slate-400 block mt-1">Genuine products guaranteed</span></div>
+        <div class="p-3"><span class="text-2xl block mb-1">🔄</span><span class="font-bold text-sm">7-Day Returns</span><span class="text-xs text-slate-400 block mt-1">Easy replacement policy</span></div>
+        <div class="p-3"><span class="text-2xl block mb-1">🎧</span><span class="font-bold text-sm">24/7 Support</span><span class="text-xs text-slate-400 block mt-1">Live assistance & WhatsApp</span></div>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-10 px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+      <div class="space-y-3">
+        <h4 class="font-bold text-base tracking-wide">Get to Know Us</h4>
+        <ul class="space-y-2 text-slate-300 text-xs">
+          <li><a href="#" onclick="event.preventDefault(); navigateTo('home')" class="hover:underline">About Teotia Shopprix</a></li>
+          <li><a href="#" onclick="event.preventDefault(); navigateTo('home')" class="hover:underline">Careers at Teotia Group</a></li>
+          <li><a href="#" onclick="event.preventDefault(); navigateTo('home')" class="hover:underline">Press Releases</a></li>
+        </ul>
+      </div>
+      <div class="space-y-3">
+        <h4 class="font-bold text-base tracking-wide">Connect with Us</h4>
+        <ul class="space-y-2 text-slate-300 text-xs">
+          <li><a href="https://facebook.com" target="_blank" class="hover:underline">Facebook Page</a></li>
+          <li><a href="https://instagram.com" target="_blank" class="hover:underline">Instagram Handle</a></li>
+          <li><a href="https://wa.me/919876543210" target="_blank" class="hover:underline text-emerald-400 font-semibold">Chat on WhatsApp</a></li>
+        </ul>
+      </div>
+      <div class="space-y-3">
+        <h4 class="font-bold text-base tracking-wide">Make Money with Us</h4>
+        <ul class="space-y-2 text-slate-300 text-xs">
+          <li><button onclick="navigateTo('admin')" class="hover:underline font-bold text-amber-300 text-left">Sell on Teotia Shopprix ⚡</button></li>
+          <li><button onclick="navigateTo('admin')" class="hover:underline text-left">Protect & Build Your Brand</button></li>
+          <li><button onclick="navigateTo('admin')" class="hover:underline text-left">Affiliate Program</button></li>
+        </ul>
+      </div>
+      <div class="space-y-3">
+        <h4 class="font-bold text-base tracking-wide">Shopprix Newsletter</h4>
+        <p class="text-xs text-slate-300">Subscribe for VIP early access to flash deals and coupons:</p>
+        <form onsubmit="handleNewsletterSubmit(event)" class="flex gap-2">
+          <input type="email" placeholder="Enter email..." class="bg-slate-800 border border-slate-600 rounded px-3 py-2 text-xs text-white flex-1 focus:outline-none focus:ring-2 focus:ring-amber-400" required />
+          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3 py-2 rounded text-xs font-bold">Join</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-700 py-6 px-6 bg-[#131921] flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto gap-4">
+      <div onclick="navigateTo('home')" class="cursor-pointer font-extrabold text-2xl tracking-tighter text-white">
+        Teotia <span class="text-[#febd69]">Shopprix</span> <span class="text-xs bg-amber-500 text-slate-950 font-bold px-1.5 py-0.5 rounded">for all</span>
+      </div>
+      <div class="flex gap-4 text-xs font-medium text-slate-300">
+        <div class="border border-slate-600 rounded px-3 py-1.5">🌐 English (EN)</div>
+        <div class="border border-slate-600 rounded px-3 py-1.5">🇮🇳 India - ₹ INR</div>
+      </div>
+    </div>
+    <div class="bg-[#0f172a] py-6 text-center text-xs text-slate-400 border-t border-slate-800">
+      <p>© 1996–2026, Teotia Shopprix for all, Inc. or its affiliates. Standalone HTML/CSS/JS Edition.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== PURE VANILLA JAVCRIPT LOGIC ==================== -->
+  <script>
+    // 1. DUMMY JSON DATA & STATE
+    const INITIAL_CATEGORIES = [
+      { name: "Electronics & Gadgets", slug: "electronics", icon: "📱", desc: "Smartphones, Laptops, Audio, Smart Watches" },
+      { name: "Fashion & Apparel", slug: "fashion", icon: "👔", desc: "Men's, Women's Clothing & Luxury Sneakers" },
+      { name: "Grocery & Gourmet", slug: "grocery", icon: "🛒", desc: "Daily Pantry, California Almonds, Wild Honey" },
+      { name: "Home & Kitchen", slug: "home-kitchen", icon: "🏠", desc: "Air Fryers, Vacuums & Ergonomic Chairs" },
+      { name: "Books & Literature", slug: "books", icon: "📚", desc: "Bestsellers, Atomic Habits, Psychology of Money" },
+      { name: "Beauty & Personal Care", slug: "beauty", icon: "✨", desc: "Skincare, Fragrances & Vitamin C Serums" }
+    ];
+
+    const INITIAL_PRODUCTS = [
+      {
+        id: 1,
+        title: "Teotia Pro X1 Ultra 5G Smartphone (12GB RAM, 256GB Storage, Titanium Gray)",
+        slug: "teotia-pro-x1-ultra-5g",
+        description: "Experience next-generation speed with 6.8-inch 120Hz AMOLED display, Snapdragon 8 Gen 3 octa-core processor, professional 108MP triple AI camera setup, and 5200mAh battery with 120W SuperCharge.",
+        price: 49999, originalPrice: 74999, discountPercentage: 33,
+        category: "Electronics & Gadgets", categorySlug: "electronics",
+        rating: 4.8, reviewCount: 2450, inStock: true, stockQuantity: 45, badge: "Best Seller",
+        images: ["https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 2,
+        title: "Sony Ultra-Noise Cancelling Over-Ear Wireless Headphones WH-1000XM5",
+        slug: "sony-ultra-noise-cancelling-headphones",
+        description: "Industry-leading noise cancellation with dual processors and 8 microphones. Enjoy up to 30 hours of crystal-clear high-resolution audio.",
+        price: 24990, originalPrice: 34990, discountPercentage: 29,
+        category: "Electronics & Gadgets", categorySlug: "electronics",
+        rating: 4.7, reviewCount: 1890, inStock: true, stockQuantity: 30, badge: "Shopprix Choice",
+        images: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 3,
+        title: "Teotia Book Elite 16 Slim Laptop (Intel Core i9, 32GB RAM, 1TB NVMe SSD)",
+        slug: "teotia-book-elite-16-slim-laptop",
+        description: "Stunning 16-inch 3.2K OLED Retina display, 14th Gen Core i9 processor, dual ThunderBolt 4 ports, and all-day 15-hour battery life inside a CNC aluminum chassis.",
+        price: 89999, originalPrice: 129999, discountPercentage: 31,
+        category: "Electronics & Gadgets", categorySlug: "electronics",
+        rating: 4.9, reviewCount: 642, inStock: true, stockQuantity: 18, badge: "Deal of the Day",
+        images: ["https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 4,
+        title: "Apple Watch Series 9 GPS + Cellular 45mm Midnight Aluminum Case",
+        slug: "apple-watch-series-9-gps-cellular",
+        description: "Brighter display, faster S9 SiP chip, magical double-tap gesture, and advanced health sensors including ECG and blood oxygen.",
+        price: 44900, originalPrice: 51900, discountPercentage: 13,
+        category: "Electronics & Gadgets", categorySlug: "electronics",
+        rating: 4.8, reviewCount: 3120, inStock: true, stockQuantity: 60, badge: "Prime Fast",
+        images: ["https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 5,
+        title: "Shopprix Couture Premium Men's Heavyweight Cotton Trench Coat & Jacket",
+        slug: "shopprix-couture-premium-trench-coat",
+        description: "Tailored from 100% premium Italian combed cotton with weather-resistant coating. Features classic double-breasted buttons and adjustable waist belt.",
+        price: 3499, originalPrice: 6999, discountPercentage: 50,
+        category: "Fashion & Apparel", categorySlug: "fashion",
+        rating: 4.6, reviewCount: 840, inStock: true, stockQuantity: 80, badge: "Big Sale",
+        images: ["https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 6,
+        title: "Urban Walkers Men's Breathable Running & Gym Athletic Sneaker Shoes",
+        slug: "urban-walkers-mens-running-sneakers",
+        description: "Engineered with responsive cloud-foam sole cushioning and 3D breathable engineered mesh upper.",
+        price: 1899, originalPrice: 4599, discountPercentage: 59,
+        category: "Fashion & Apparel", categorySlug: "fashion",
+        rating: 4.5, reviewCount: 1420, inStock: true, stockQuantity: 120, badge: "Trending",
+        images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 7,
+        title: "Teotia Naturals Organic Premium California Almonds (Badam) 1 Kg Pack",
+        slug: "teotia-naturals-organic-california-almonds-1kg",
+        description: "Hand-picked jumbo California almonds sorted for supreme quality, crunch, and natural sweetness.",
+        price: 849, originalPrice: 1499, discountPercentage: 43,
+        category: "Grocery & Gourmet", categorySlug: "grocery",
+        rating: 4.9, reviewCount: 5120, inStock: true, stockQuantity: 300, badge: "Best Seller",
+        images: ["https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 8,
+        title: "Himalayan Forest 100% Pure Raw Wild Multiflora Honey (Glass Jar 500g)",
+        slug: "himalayan-forest-pure-raw-wild-honey-500g",
+        description: "Sourced directly from indigenous bee colonies deep in the pristine valleys of the Himalayas. Unheated and unpasteurized.",
+        price: 499, originalPrice: 799, discountPercentage: 38,
+        category: "Grocery & Gourmet", categorySlug: "grocery",
+        rating: 4.7, reviewCount: 1680, inStock: true, stockQuantity: 150, badge: "Prime Fast",
+        images: ["https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 9,
+        title: "Philips Air Fryer XL 6.2L Digital Touch with Fat Removal Technology",
+        slug: "philips-air-fryer-xl-6-2l-digital-touch",
+        description: "Fry, bake, grill, roast, and reheat with up to 90% less oil! Equipped with Rapid Air 360-degree vortex airflow.",
+        price: 9999, originalPrice: 15999, discountPercentage: 38,
+        category: "Home & Kitchen", categorySlug: "home-kitchen",
+        rating: 4.7, reviewCount: 4320, inStock: true, stockQuantity: 35, badge: "Deal of the Day",
+        images: ["https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 10,
+        title: "Dyson V15 Detect Extra Cordless Vacuum Cleaner with Laser Dust Detection",
+        slug: "dyson-v15-detect-extra-cordless-vacuum",
+        description: "Reveals microscopic dust on hard floors with a precisely-angled laser sensor. Piezo sensor continuously counts dust particles.",
+        price: 54900, originalPrice: 65900, discountPercentage: 17,
+        category: "Home & Kitchen", categorySlug: "home-kitchen",
+        rating: 4.9, reviewCount: 1105, inStock: true, stockQuantity: 15, badge: "Premium Choice",
+        images: ["https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 11,
+        title: "Ergonomic Mesh Office Chair with High Back & Adjustable Lumbar Support",
+        slug: "ergonomic-mesh-office-chair-lumbar-support",
+        description: "Engineered to eliminate lower back pain during long working hours. Features 4D adjustable armrests and multi-angle synchro-tilt lock.",
+        price: 7499, originalPrice: 14999, discountPercentage: 50,
+        category: "Home & Kitchen", categorySlug: "home-kitchen",
+        rating: 4.6, reviewCount: 1980, inStock: true, stockQuantity: 50, badge: "Best Seller",
+        images: ["https://images.unsplash.com/photo-1580481077494-e3299acabf75?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 12,
+        title: "Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones",
+        slug: "atomic-habits-james-clear-hardcover",
+        description: "No matter your goals, Atomic Habits offers a proven framework for improving every day. James Clear reveals practical strategies.",
+        price: 499, originalPrice: 799, discountPercentage: 38,
+        category: "Books & Literature", categorySlug: "books",
+        rating: 4.9, reviewCount: 18500, inStock: true, stockQuantity: 250, badge: "#1 Global Bestseller",
+        images: ["https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80"]
+      },
+      {
+        id: 13,
+        title: "Teotia Glow Radiance Vitamin C + Hyaluronic Acid Brightening Face Serum (30ml)",
+        slug: "teotia-glow-radiance-vitamin-c-serum-30ml",
+        description: "Formulated with 20% pure L-Ascorbic Acid and 2% Hyaluronic Acid. Instantly boosts glow and fades dark spots.",
+        price: 599, originalPrice: 1199, discountPercentage: 50,
+        category: "Beauty & Personal Care", categorySlug: "beauty",
+        rating: 4.7, reviewCount: 3890, inStock: true, stockQuantity: 110, badge: "Best Seller",
+        images: ["https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80"]
+      }
+    ];
+
+    // Global state
+    let state = {
+      products: JSON.parse(localStorage.getItem('shopprix_products_html')) || INITIAL_PRODUCTS,
+      cart: JSON.parse(localStorage.getItem('shopprix_cart_html')) || [],
+      wishlist: JSON.parse(localStorage.getItem('shopprix_wishlist_html')) || [1, 4],
+      user: JSON.parse(localStorage.getItem('shopprix_user_html')) || { name: "Vikram Teotia", email: "vikram@teotia.com", role: "admin", isLoggedIn: true },
+      location: JSON.parse(localStorage.getItem('shopprix_location_html')) || { city: "New Delhi", pincode: "110001" },
+      currentView: 'home',
+      selectedCategoryFilter: 'all',
+      selectedProductId: 1,
+      appliedCouponDiscount: 0,
+      appliedCouponCode: '',
+      lastOrder: null
+    };
+
+    function saveState() {
+      localStorage.setItem('shopprix_products_html', JSON.stringify(state.products));
+      localStorage.setItem('shopprix_cart_html', JSON.stringify(state.cart));
+      localStorage.setItem('shopprix_wishlist_html', JSON.stringify(state.wishlist));
+      localStorage.setItem('shopprix_user_html', JSON.stringify(state.user));
+      localStorage.setItem('shopprix_location_html', JSON.stringify(state.location));
+      updateHeaderBadges();
+    }
+
+    function updateHeaderBadges() {
+      const totalQty = state.cart.reduce((a, b) => a + b.quantity, 0);
+      document.getElementById('cartCountBadge').innerText = totalQty;
+      document.getElementById('headerUserGreeting').innerText = state.user ? `Hello, ${state.user.name.split(' ')[0]}` : 'Hello, sign in';
+      document.getElementById('megaMenuUserName').innerText = state.user ? `Hello, ${state.user.name.split(' ')[0]}` : 'Sign in';
+      document.getElementById('headerCity').innerText = `Delivering to ${state.location.city}`;
+      document.getElementById('headerPincode').innerText = `${state.location.pincode} • Update location ▼`;
+      
+      const authArea = document.getElementById('accountDropdownAuthArea');
+      if (state.user) {
+        authArea.innerHTML = `
+          <p class="text-xs text-slate-500">Signed in as</p>
+          <p class="font-bold text-sm truncate">${state.user.email}</p>
+          <button onclick="navigateTo('admin')" class="mt-2 w-full bg-amber-500 text-slate-950 font-bold py-1.5 rounded text-xs">Visit Admin Panel</button>
+        `;
+      } else {
+        authArea.innerHTML = `
+          <button onclick="navigateTo('login')" class="w-full bg-amber-500 text-slate-950 font-bold py-1.5 rounded text-sm">Sign in</button>
+        `;
+      }
+    }
+
+    // 2. NAVIGATION & ROUTING
+    function navigateTo(view, filterOrId) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      state.currentView = view;
+      if (view === 'listing' && filterOrId) {
+        selectCategoryFilter(filterOrId);
+      } else if (view === 'detail' && filterOrId) {
+        state.selectedProductId = Number(filterOrId);
+      }
+      renderCurrentView();
+    }
+
+    function selectCategoryFilter(slug) {
+      state.selectedCategoryFilter = slug;
+      const select = document.getElementById('searchCategorySelect');
+      if (select) select.value = slug;
+    }
+
+    function handleCategorySelectChange() {
+      const slug = document.getElementById('searchCategorySelect').value;
+      selectCategoryFilter(slug);
+      if (state.currentView === 'listing') renderCurrentView();
+    }
+
+    // 3. RENDER VIEWS
+    function renderCurrentView() {
+      const container = document.getElementById('mainContainer');
+      updateHeaderBadges();
+
+      if (state.currentView === 'home') {
+        container.innerHTML = getHomeHTML();
+        initHeroSlider();
+      } else if (state.currentView === 'listing') {
+        container.innerHTML = getListingHTML();
+      } else if (state.currentView === 'detail') {
+        container.innerHTML = getDetailHTML(state.selectedProductId);
+      } else if (state.currentView === 'cart') {
+        container.innerHTML = getCartHTML();
+      } else if (state.currentView === 'checkout') {
+        container.innerHTML = getCheckoutHTML();
+      } else if (state.currentView === 'login') {
+        container.innerHTML = getLoginHTML();
+      } else if (state.currentView === 'order-success') {
+        container.innerHTML = getOrderSuccessHTML();
+      } else if (state.currentView === 'admin') {
+        container.innerHTML = getAdminHTML();
+      } else if (state.currentView === 'wishlist') {
+        container.innerHTML = getWishlistHTML();
+      } else if (state.currentView === 'orders') {
+        container.innerHTML = getOrdersHTML();
+      }
+    }
+
+    // 4. HOME VIEW HTML & HERO SLIDER
+    let currentHeroSlide = 0;
+    let heroSliderTimer = null;
+
+    function getHomeHTML() {
+      const deals = state.products.filter(p => p.discountPercentage >= 30).slice(0, 4);
+      const bestSellers = state.products.filter(p => p.badge === 'Best Seller' || p.rating >= 4.8).slice(0, 4);
+      const trending = state.products.slice(0, 8);
+
+      return `
+        <div class="space-y-10 pb-12">
+          <!-- Hero Carousel -->
+          <div class="relative w-full h-[360px] sm:h-[440px] md:h-[500px] overflow-hidden rounded-b-2xl shadow-2xl bg-gradient-to-r from-slate-900 via-blue-950 to-[#131921] text-white flex items-center justify-between px-6 md:px-12" id="heroBannerBox">
+            <div class="space-y-4 max-w-2xl z-10">
+              <span class="inline-block bg-amber-500 text-slate-950 font-black text-xs px-3 py-1 rounded-full uppercase tracking-widest shadow-md">✨ Mega Festive Dhamaka</span>
+              <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">Up to 70% OFF on Top Brand Electronics & Couture</h1>
+              <p class="text-sm sm:text-lg text-slate-200 font-medium">Plus 10% Instant Bank Discount • Free Express Shipping Over ₹499</p>
+              <button onclick="navigateTo('listing', 'all')" class="bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-black text-sm md:text-base px-6 py-3 rounded-xl shadow-xl transition-transform transform hover:-translate-y-0.5">Explore Big Sale →</button>
+            </div>
+          </div>
+
+          <!-- 4 Category Grid Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 -mt-16 z-20 relative">
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 class="font-extrabold text-lg mb-3">Upgrade your Home | Appliances & Tech</h3>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div onclick="navigateTo('listing', 'home-kitchen')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Air Fryers</span></div>
+                  <div onclick="navigateTo('listing', 'home-kitchen')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1558317374-067fb5f30001?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Vacuums</span></div>
+                </div>
+              </div>
+              <button onclick="navigateTo('listing', 'home-kitchen')" class="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline text-left">See all Home products →</button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 class="font-extrabold text-lg mb-3">Revamp your Wardrobe | Fashion Wear</h3>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div onclick="navigateTo('listing', 'fashion')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Trench Coats</span></div>
+                  <div onclick="navigateTo('listing', 'fashion')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Sneakers</span></div>
+                </div>
+              </div>
+              <button onclick="navigateTo('listing', 'fashion')" class="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline text-left">See all Fashion wear →</button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 class="font-extrabold text-lg mb-3">Latest Gadgets | Mobiles & Laptops</h3>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div onclick="navigateTo('listing', 'electronics')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Pro Phones</span></div>
+                  <div onclick="navigateTo('listing', 'electronics')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Headphones</span></div>
+                </div>
+              </div>
+              <button onclick="navigateTo('listing', 'electronics')" class="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline text-left">See all Electronics →</button>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-5 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+              <div>
+                <h3 class="font-extrabold text-lg mb-3">Daily Pantry | Gourmet & Superfoods</h3>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <div onclick="navigateTo('listing', 'grocery')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Almonds</span></div>
+                  <div onclick="navigateTo('listing', 'grocery')" class="cursor-pointer group"><img src="https://images.unsplash.com/photo-1587049352847-4a222e784d38?auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg group-hover:opacity-90" /><span class="text-xs font-semibold block mt-1">Wild Honey</span></div>
+                </div>
+              </div>
+              <button onclick="navigateTo('listing', 'grocery')" class="mt-4 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline text-left">See all Grocery items →</button>
+            </div>
+          </div>
+
+          <!-- Deals of the Day -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700 mb-6">
+              <div>
+                <h2 class="text-xl sm:text-2xl font-extrabold flex items-center gap-2">⚡ Lightning Deals of the Day</h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Ends in <span class="text-red-600 font-bold">14h : 28m : 45s</span> • Limited Stock!</p>
+              </div>
+              <button onclick="navigateTo('listing', 'all')" class="text-sm font-bold text-blue-600 hover:underline">See all deals →</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              ${deals.map(p => getProductCardHTML(p)).join('')}
+            </div>
+          </div>
+
+          <!-- Best Sellers -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700 mb-6">
+              <h2 class="text-xl sm:text-2xl font-extrabold">Best Sellers in Teotia Shopprix</h2>
+              <button onclick="navigateTo('listing', 'all')" class="text-sm font-bold text-blue-600 hover:underline">See all bestsellers →</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              ${bestSellers.map(p => getProductCardHTML(p)).join('')}
+            </div>
+          </div>
+
+          <!-- Trending Catalog -->
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-md border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700 mb-6">
+              <h2 class="text-xl sm:text-2xl font-extrabold">Explore All Trending Products</h2>
+              <button onclick="navigateTo('listing', 'all')" class="text-sm font-bold text-blue-600 hover:underline">Complete catalog →</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              ${trending.map(p => getProductCardHTML(p)).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function initHeroSlider() {
+      // Auto slider logic for demo
+    }
+
+    // 5. PRODUCT CARD HTML COMPONENT
+    function getProductCardHTML(product) {
+      const isWishlisted = state.wishlist.includes(product.id);
+      const img = Array.isArray(product.images) ? product.images[0] : product.images;
+
+      return `
+        <div onclick="navigateTo('detail', '${product.id}')" class="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-amber-400 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden cursor-pointer relative">
+          <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between z-10 pointer-events-none">
+            <div class="flex flex-col gap-1 pointer-events-auto">
+              ${product.badge ? `<span class="bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2 py-0.5 rounded uppercase">${product.badge}</span>` : ''}
+              ${product.discountPercentage > 0 ? `<span class="bg-red-600 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded">-${product.discountPercentage}% OFF</span>` : ''}
+            </div>
+            <button onclick="event.stopPropagation(); toggleWishlistProduct(${product.id})" class="p-2 rounded-full bg-white/90 dark:bg-slate-900/90 shadow-md text-slate-600 dark:text-slate-300 hover:text-pink-500 pointer-events-auto" title="Wishlist">
+              ${isWishlisted ? '💖' : '🤍'}
+            </button>
+          </div>
+
+          <div class="w-full aspect-square bg-slate-50 dark:bg-slate-900/40 overflow-hidden relative flex items-center justify-center p-4">
+            <img src="${img}" alt="${product.title}" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ${!product.inStock ? 'opacity-50 grayscale' : ''}" />
+            ${!product.inStock ? `<div class="absolute inset-0 bg-black/40 flex items-center justify-center"><span class="bg-red-600 text-white font-black text-xs px-3 py-1.5 rounded-full uppercase">Out of Stock</span></div>` : ''}
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">${product.category}</span>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white line-clamp-2 mt-1 group-hover:text-amber-500 transition-colors">${product.title}</h3>
+              <div class="flex items-center gap-1.5 mt-2">
+                <span class="text-amber-400 font-bold text-xs">⭐⭐⭐⭐⭐</span>
+                <span class="text-xs font-bold">${product.rating}</span>
+                <span class="text-xs text-blue-600 hover:underline">(${product.reviewCount})</span>
+              </div>
+              <div class="mt-2.5 flex items-baseline gap-2">
+                <span class="text-base sm:text-lg font-extrabold">₹${Number(product.price).toLocaleString('en-IN')}</span>
+                ${Number(product.originalPrice) > Number(product.price) ? `<span class="text-xs text-slate-400 line-through">₹${Number(product.originalPrice).toLocaleString('en-IN')}</span>` : ''}
+              </div>
+              <div class="mt-2 text-[11px] font-black italic text-blue-600 dark:text-blue-400">✓ Shopprix Fast <span class="text-[10px] text-slate-500 font-medium not-italic">FREE Delivery tomorrow</span></div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+              ${product.inStock ? `
+                <button onclick="event.stopPropagation(); addToCartProduct(${product.id}, 1)" class="w-full bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-bold py-2 px-3 rounded-lg text-xs shadow-sm transition-all cursor-pointer">🛒 Add to Cart</button>
+              ` : `
+                <button disabled class="w-full bg-slate-200 dark:bg-slate-700 text-slate-500 font-bold py-2 px-3 rounded-lg text-xs cursor-not-allowed">Out of Stock</button>
+              `}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 6. LISTING VIEW HTML
+    function getListingHTML() {
+      const filtered = state.products.filter(p => {
+        if (state.selectedCategoryFilter !== 'all' && p.categorySlug !== state.selectedCategoryFilter) return false;
+        return true;
+      });
+
+      return `
+        <div class="flex flex-col lg:flex-row gap-8 py-4">
+          <!-- Sidebar Filters -->
+          <aside class="w-full lg:w-64 shrink-0 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-700 font-extrabold uppercase text-xs tracking-wider">
+              <span>Department Filters</span>
+              <button onclick="selectCategoryFilter('all'); renderCurrentView()" class="text-amber-500 hover:underline">Reset</button>
+            </div>
+            <div class="space-y-1.5 text-xs font-medium">
+              <button onclick="selectCategoryFilter('all'); renderCurrentView()" class="w-full text-left py-1.5 px-2.5 rounded-lg flex justify-between ${state.selectedCategoryFilter==='all'?'bg-amber-500 text-slate-950 font-bold':'hover:bg-slate-100 dark:hover:bg-slate-700'}">All Departments <span>(${state.products.length})</span></button>
+              ${INITIAL_CATEGORIES.map(c => `
+                <button onclick="selectCategoryFilter('${c.slug}'); renderCurrentView()" class="w-full text-left py-1.5 px-2.5 rounded-lg flex justify-between ${state.selectedCategoryFilter===c.slug?'bg-amber-500 text-slate-950 font-bold':'hover:bg-slate-100 dark:hover:bg-slate-700'}">
+                  <span>${c.icon} ${c.name}</span>
+                  <span>(${state.products.filter(p => p.categorySlug===c.slug).length})</span>
+                </button>
+              `).join('')}
+            </div>
+          </aside>
+
+          <!-- Grid Area -->
+          <main class="flex-1">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 flex justify-between items-center mb-6">
+              <h1 class="text-xl font-extrabold">${state.selectedCategoryFilter === 'all' ? 'All Products & Catalog' : INITIAL_CATEGORIES.find(c=>c.slug===state.selectedCategoryFilter)?.name} (${filtered.length} items)</h1>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${filtered.map(p => getProductCardHTML(p)).join('')}
+            </div>
+          </main>
+        </div>
+      `;
+    }
+
+    // 7. DETAIL VIEW HTML
+    function getDetailHTML(productId) {
+      const product = state.products.find(p => p.id === productId) || state.products[0];
+      const img = Array.isArray(product.images) ? product.images[0] : product.images;
+
+      return `
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-6 lg:p-8 shadow-xl border border-slate-200 dark:border-slate-700 grid grid-cols-1 lg:grid-cols-12 gap-8 py-6">
+          <div class="lg:col-span-5 flex items-center justify-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-6 border aspect-square">
+            <img src="${img}" class="w-full h-full object-contain" />
+          </div>
+          <div class="lg:col-span-4 space-y-4">
+            <span class="text-xs font-extrabold text-amber-500 uppercase tracking-wider">${product.category}</span>
+            <h1 class="text-2xl font-black">${product.title}</h1>
+            <div class="flex items-center gap-2 text-amber-400 text-sm font-bold">⭐⭐⭐⭐⭐ ${product.rating} (${product.reviewCount} verified reviews)</div>
+            <div class="flex items-baseline gap-3">
+              <span class="text-3xl font-black">₹${Number(product.price).toLocaleString('en-IN')}</span>
+              ${Number(product.originalPrice) > Number(product.price) ? `<span class="text-slate-400 line-through">₹${Number(product.originalPrice).toLocaleString('en-IN')}</span>` : ''}
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${product.description}</p>
+            <div class="grid grid-cols-3 gap-2 text-center text-xs font-semibold py-3 border-t">
+              <div>🚚 Shopprix Express</div><div>🛡️ 2 Yr Warranty</div><div>🔄 7 Days Return</div>
+            </div>
+          </div>
+          <div class="lg:col-span-3 bg-slate-50 dark:bg-slate-900/70 p-5 rounded-2xl border space-y-4">
+            <div class="text-xl font-black">₹${Number(product.price).toLocaleString('en-IN')}</div>
+            <div class="text-sm font-bold ${product.inStock ? 'text-emerald-500' : 'text-red-500'}">${product.inStock ? '✓ In Stock Ready' : '✕ Out of Stock'}</div>
+            ${product.inStock ? `
+              <button onclick="addToCartProduct(${product.id}, 1)" class="w-full bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-extrabold py-3 rounded-xl text-sm shadow-md">🛒 Add to Cart</button>
+              <button onclick="addToCartProduct(${product.id}, 1); navigateTo('checkout')" class="w-full bg-[#ffa41c] hover:bg-[#fa8900] text-slate-950 font-extrabold py-3 rounded-xl text-sm shadow-md">✨ Buy Now</button>
+            ` : `<button disabled class="w-full bg-slate-300 dark:bg-slate-700 text-slate-500 py-3 rounded-xl font-bold">Out of Stock</button>`}
+          </div>
+        </div>
+      `;
+    }
+
+    // 8. CART VIEW HTML
+    function getCartHTML() {
+      const subtotal = state.cart.reduce((a, b) => a + b.price * b.quantity, 0);
+      const totalQty = state.cart.reduce((a, b) => a + b.quantity, 0);
+      const shipping = subtotal >= 499 || subtotal === 0 ? 0 : 49;
+      const grandTotal = Math.max(0, subtotal + shipping - state.appliedCouponDiscount);
+
+      if (state.cart.length === 0) {
+        return `
+          <div class="bg-white dark:bg-slate-800 rounded-2xl p-12 text-center max-w-xl mx-auto my-8 space-y-4 shadow-md">
+            <div class="text-6xl">🛒</div>
+            <h2 class="text-2xl font-black">Your Teotia Shopprix Cart is Empty</h2>
+            <button onclick="navigateTo('home')" class="bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-black px-8 py-3 rounded-xl shadow-lg">Start Shopping Now</button>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 py-4">
+          <div class="lg:col-span-8 space-y-4">
+            <h1 class="text-2xl font-black">Shopping Cart (${totalQty} items)</h1>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border divide-y overflow-hidden">
+              ${state.cart.map(item => `
+                <div class="p-4 flex items-center justify-between gap-4">
+                  <div class="flex items-center gap-4">
+                    <img src="${item.image}" class="w-16 h-16 object-contain rounded border p-1" />
+                    <div>
+                      <h3 class="font-bold text-sm">${item.title}</h3>
+                      <span class="text-xs font-bold text-emerald-500">In Stock</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-4">
+                    <div class="flex items-center border rounded-lg bg-slate-50 dark:bg-slate-900">
+                      <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" class="px-2.5 py-1 font-bold">-</button>
+                      <span class="px-2 font-black text-xs">${item.quantity}</span>
+                      <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" class="px-2.5 py-1 font-bold">+</button>
+                    </div>
+                    <div class="text-right">
+                      <span class="font-black text-base block">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                      <button onclick="removeFromCartProduct(${item.id})" class="text-xs text-red-500 font-bold hover:underline">Remove</button>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white dark:bg-slate-800 p-6 rounded-2xl border space-y-4 shadow-xl">
+            <h3 class="font-extrabold text-base border-b pb-2">Order Price Summary</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>Subtotal:</span><span class="font-bold">₹${subtotal.toLocaleString('en-IN')}</span></div>
+              <div class="flex justify-between"><span>Shipping:</span><span class="font-bold text-emerald-500">${shipping===0 ? 'FREE' : '₹'+shipping}</span></div>
+              ${state.appliedCouponDiscount > 0 ? `<div class="flex justify-between text-emerald-500 font-bold"><span>Coupon Discount:</span><span>- ₹${state.appliedCouponDiscount}</span></div>` : ''}
+            </div>
+            <div class="pt-3 border-t flex justify-between font-black text-xl">
+              <span>Grand Total:</span><span>₹${grandTotal.toLocaleString('en-IN')}</span>
+            </div>
+            <button onclick="navigateTo('checkout')" class="w-full bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-black py-3.5 rounded-xl shadow-lg">Proceed to Buy (${totalQty} items) →</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 9. CHECKOUT VIEW HTML
+    function getCheckoutHTML() {
+      return `
+        <div class="max-w-4xl mx-auto py-6 space-y-6">
+          <h1 class="text-2xl font-black">🔒 Secure Checkout • Teotia Shopprix</h1>
+          <form onsubmit="handlePlaceOrderForm(event)" class="bg-white dark:bg-slate-800 p-6 rounded-2xl border space-y-6 shadow-md">
+            <div>
+              <h3 class="font-bold text-lg mb-3">1. Shipping Destination</h3>
+              <input type="text" id="chkName" value="Vikram Teotia" placeholder="Full Name" class="w-full px-3 py-2 text-sm rounded border mb-2 bg-slate-50 dark:bg-slate-900" required />
+              <input type="text" id="chkAddress" value="Flat 402, Lotus Towers, Connaught Place, New Delhi, 110001" placeholder="Address" class="w-full px-3 py-2 text-sm rounded border bg-slate-50 dark:bg-slate-900" required />
+            </div>
+            <div>
+              <h3 class="font-bold text-lg mb-3">2. Choose Payment Option</h3>
+              <select id="chkPayment" class="w-full px-3 py-2.5 font-bold rounded border bg-slate-50 dark:bg-slate-900">
+                <option value="UPI">📱 UPI (GPay / PhonePe / Paytm)</option>
+                <option value="CARD">💳 Credit / Debit Card (Visa/MC)</option>
+                <option value="COD">💵 Cash on Delivery (COD)</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-black py-3.5 rounded-xl text-base shadow-lg">Place Your Order & Pay Now</button>
+          </form>
+        </div>
+      `;
+    }
+
+    function getOrderSuccessHTML() {
+      const orderNum = state.lastOrder?.orderNumber || `TS-2026-${Math.floor(10000+Math.random()*90000)}`;
+      return `
+        <div class="max-w-2xl mx-auto py-12 text-center bg-white dark:bg-slate-800 rounded-3xl border shadow-2xl p-8 space-y-6 my-6">
+          <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-4xl">✓</div>
+          <h1 class="text-3xl font-black">Order Placed Successfully! 🎉</h1>
+          <p class="font-bold text-amber-500 text-lg">Order ID: #${orderNum}</p>
+          <p class="text-sm text-slate-500">Thank you for shopping with Teotia Shopprix for all. Your invoice and tracking details are active.</p>
+          <div class="flex gap-4 justify-center">
+            <button onclick="navigateTo('orders')" class="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl text-xs">Track Orders</button>
+            <button onclick="navigateTo('home')" class="bg-[#ffd814] text-slate-950 font-black px-6 py-3 rounded-xl text-xs">Continue Shopping</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getLoginHTML() {
+      return `
+        <div class="max-w-md mx-auto py-12 bg-white dark:bg-slate-800 rounded-2xl border p-8 space-y-6 shadow-xl my-8">
+          <h1 class="text-2xl font-black">Sign in to Teotia Shopprix</h1>
+          <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+            <input type="text" id="loginEmail" value="vikram@teotia.com" placeholder="Email or mobile" class="w-full px-3 py-2 text-sm rounded border bg-slate-50 dark:bg-slate-900" required />
+            <input type="password" value="secret123" placeholder="Password" class="w-full px-3 py-2 text-sm rounded border bg-slate-50 dark:bg-slate-900" required />
+            <button type="submit" class="w-full bg-[#ffd814] hover:bg-[#f7ca00] text-slate-950 font-black py-3 rounded-xl">Sign in</button>
+          </form>
+          <div class="pt-4 border-t flex justify-between text-xs font-bold">
+            <button onclick="presetLogin('admin@teotiashopprix.com', 'Vikram Teotia (Admin)', 'admin')" class="text-amber-500">⚡ Login as Admin</button>
+            <button onclick="presetLogin('shopper@gmail.com', 'Ananya Sharma (Shopper)', 'customer')" class="text-blue-500">🛍️ Login as Shopper</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function getAdminHTML() {
+      return `
+        <div class="py-6 space-y-6">
+          <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-black">⚡ Admin Control Panel (${state.products.length} Products)</h1>
+            <button onclick="resetDemoDatabase()" class="bg-slate-800 text-amber-400 font-bold px-4 py-2 rounded-xl text-xs">Refresh Demo Database</button>
+          </div>
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border overflow-hidden shadow-md">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 dark:bg-slate-900 font-bold uppercase border-b">
+                <tr><th class="p-3">Product Name</th><th class="p-3">Category</th><th class="p-3">Price</th><th class="p-3">Stock Status Toggle</th><th class="p-3 text-right">Delete</th></tr>
+              </thead>
+              <tbody class="divide-y">
+                ${state.products.map(p => `
+                  <tr>
+                    <td class="p-3 font-bold">${p.title}</td>
+                    <td class="p-3">${p.category}</td>
+                    <td class="p-3 font-black">₹${Number(p.price).toLocaleString('en-IN')}</td>
+                    <td class="p-3">
+                      <button onclick="toggleAdminStock(${p.id})" class="px-3 py-1 rounded-full font-bold ${p.inStock?'bg-emerald-500 text-slate-950':'bg-red-600 text-white'}">${p.inStock ? '✓ In Stock' : '✕ Out of Stock'}</button>
+                    </td>
+                    <td class="p-3 text-right">
+                      <button onclick="deleteAdminProduct(${p.id})" class="text-red-500 font-bold">🗑️ Delete</button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function getWishlistHTML() {
+      const wishlisted = state.products.filter(p => state.wishlist.includes(p.id));
+      return `
+        <div class="py-6 space-y-6">
+          <h1 class="text-2xl font-black">Your Wishlist (${wishlisted.length} items)</h1>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+            ${wishlisted.map(p => getProductCardHTML(p)).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function getOrdersHTML() {
+      return `
+        <div class="py-6 space-y-6 max-w-4xl mx-auto">
+          <h1 class="text-2xl font-black">📦 Your Orders & Shipments</h1>
+          <div class="bg-white dark:bg-slate-800 rounded-2xl border p-6 space-y-4 shadow-md">
+            <div class="flex justify-between font-bold text-sm border-b pb-2">
+              <span>Order #TS-2026-89412</span>
+              <span class="text-emerald-500">Delivered ✓</span>
+            </div>
+            <p class="text-xs text-slate-500">Delivered to Vikram Teotia • Flat 402, Lotus Towers, New Delhi</p>
+            <div class="flex justify-between font-black text-base pt-2">
+              <span>Total Paid: ₹49,999 (UPI)</span>
+              <button onclick="alert('Invoice downloaded as PDF! 📑')" class="text-xs text-amber-500 font-bold">Download Invoice 📑</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 10. ACTION CONTROLLERS
+    function addToCartProduct(productId, qty = 1) {
+      const prod = state.products.find(p => p.id === productId);
+      if (!prod || !prod.inStock) return;
+
+      const idx = state.cart.findIndex(i => i.id === productId);
+      if (idx > -1) {
+        state.cart[idx].quantity += qty;
+      } else {
+        const img = Array.isArray(prod.images) ? prod.images[0] : prod.images;
+        state.cart.push({ id: prod.id, title: prod.title, price: prod.price, image: img, quantity: qty, category: prod.category });
+      }
+      saveState();
+      alert('✓ Added to cart!');
+    }
+
+    function updateCartQuantity(productId, qty) {
+      if (qty <= 0) {
+        removeFromCartProduct(productId);
+        return;
+      }
+      const item = state.cart.find(i => i.id === productId);
+      if (item) item.quantity = qty;
+      saveState();
+      renderCurrentView();
+    }
+
+    function removeFromCartProduct(productId) {
+      state.cart = state.cart.filter(i => i.id !== productId);
+      saveState();
+      renderCurrentView();
+    }
+
+    function toggleWishlistProduct(productId) {
+      if (state.wishlist.includes(productId)) {
+        state.wishlist = state.wishlist.filter(id => id !== productId);
+      } else {
+        state.wishlist.push(productId);
+      }
+      saveState();
+      renderCurrentView();
+    }
+
+    function toggleAdminStock(productId) {
+      const p = state.products.find(i => i.id === productId);
+      if (p) p.inStock = !p.inStock;
+      saveState();
+      renderCurrentView();
+    }
+
+    function deleteAdminProduct(productId) {
+      if (!confirm("Delete this product from catalog?")) return;
+      state.products = state.products.filter(i => i.id !== productId);
+      saveState();
+      renderCurrentView();
+    }
+
+    function resetDemoDatabase() {
+      state.products = INITIAL_PRODUCTS;
+      saveState();
+      renderCurrentView();
+      alert('Demo database reset successfully! 🚀');
+    }
+
+    function handlePlaceOrderForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('chkName').value;
+      const addr = document.getElementById('chkAddress').value;
+      const pm = document.getElementById('chkPayment').value;
+
+      state.lastOrder = {
+        orderNumber: `TS-2026-${Math.floor(10000+Math.random()*90000)}`,
+        customerName: name,
+        shippingAddress: addr,
+        paymentMethod: pm
+      };
+      state.cart = [];
+      saveState();
+      navigateTo('order-success');
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      state.user = { name: "Vikram Teotia", email, role: "admin", isLoggedIn: true };
+      saveState();
+      navigateTo('home');
+    }
+
+    function presetLogin(email, name, role) {
+      state.user = { name, email, role, isLoggedIn: true };
+      saveState();
+      navigateTo('home');
+    }
+
+    function toggleAccountMenu(show) {
+      const dropdown = document.getElementById('accountDropdown');
+      if (show) dropdown.classList.remove('hidden');
+      else dropdown.classList.add('hidden');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      if (id === 'megaMenuModal') {
+        renderMegaMenuCategories();
+      }
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function renderMegaMenuCategories() {
+      const list = document.getElementById('megaMenuCategoriesList');
+      list.innerHTML = `
+        <li><button onclick="selectCategoryFilter('all'); navigateTo('listing'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-bold text-amber-500">🛍️ All Products (${INITIAL_CATEGORIES.length} Departments) →</button></li>
+        ${INITIAL_CATEGORIES.map(c => `
+          <li><button onclick="selectCategoryFilter('${c.slug}'); navigateTo('listing'); closeModal('megaMenuModal')" class="w-full text-left py-2 px-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg flex justify-between"><span>${c.icon} ${c.name}</span><span>→</span></button></li>
+        `).join('')}
+      `;
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      document.getElementById('darkModeBtn').innerText = isDark ? '☀️' : '🌙';
+    }
+
+    function handleSearch(e) {
+      e.preventDefault();
+      navigateTo('listing');
+    }
+
+    // INITIALIZE ON LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCurrentView();
+    });
+  </script>
+</body>
+</html>
