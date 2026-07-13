@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://amazon-clone-backend.onrender.com/api/:path*"
+    }
+  ]
+}

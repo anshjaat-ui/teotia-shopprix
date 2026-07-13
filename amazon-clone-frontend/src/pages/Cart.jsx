@@ -1,0 +1,93 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { Trash2, Minus, Plus } from 'lucide-react'
+import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+
+export default function Cart() {
+  const { cart, subtotal, updateQty, removeFromCart, loading } = useCart()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  if (!user) {
+    return (
+      <main className="bg-surface min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
+        <p className="text-gray-600">Sign in to see items in your cart.</p>
+        <Link to="/login" className="bg-accent hover:bg-accent-orange px-6 py-1.5 rounded-full text-sm font-medium border border-accent-orange/40">
+          Sign in
+        </Link>
+      </main>
+    )
+  }
+
+  if (loading) {
+    return <main className="bg-surface min-h-[60vh] flex items-center justify-center text-gray-500">Loading cart...</main>
+  }
+
+  if (!cart.items || cart.items.length === 0) {
+    return (
+      <main className="bg-surface min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
+        <p className="text-gray-600">Your bazario Cart is empty.</p>
+        <Link to="/" className="bg-accent hover:bg-accent-orange px-6 py-1.5 rounded-full text-sm font-medium border border-accent-orange/40">
+          Continue shopping
+        </Link>
+      </main>
+    )
+  }
+
+  return (
+    <main className="bg-surface min-h-[70vh] font-sans">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-6">
+        <div className="lg:col-span-2 bg-white p-4 rounded-sm shadow-card">
+          <h1 className="text-2xl font-medium mb-4 border-b pb-3">Shopping Cart</h1>
+
+          {cart.items.map((item) => (
+            <div key={item.product._id} className="flex gap-4 py-4 border-b last:border-0">
+              <img src={item.product.images?.[0]} alt={item.product.name} className="w-24 h-24 object-contain" />
+              <div className="flex-1">
+                <p className="text-sm font-medium mb-1">{item.product.name}</p>
+                <p className="text-price font-medium mb-2">₹{item.product.price.toLocaleString('en-IN')}</p>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border rounded-full overflow-hidden">
+                    <button
+                      onClick={() => updateQty(item.product._id, Math.max(1, item.qty - 1))}
+                      className="px-2 py-1 hover:bg-gray-100"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="px-3 text-sm">{item.qty}</span>
+                    <button
+                      onClick={() => updateQty(item.product._id, item.qty + 1)}
+                      className="px-2 py-1 hover:bg-gray-100"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => removeFromCart(item.product._id)}
+                    className="text-xs text-link hover:underline flex items-center gap-1"
+                  >
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-white p-4 rounded-sm shadow-card h-fit">
+          <p className="text-sm mb-2">
+            Subtotal ({cart.items.reduce((s, i) => s + i.qty, 0)} items):{' '}
+            <span className="font-bold">₹{subtotal.toLocaleString('en-IN')}</span>
+          </p>
+          <button
+            onClick={() => navigate('/checkout')}
+            className="w-full bg-accent hover:bg-accent-orange rounded-full py-1.5 text-sm font-medium border border-accent-orange/40"
+          >
+            Proceed to Buy
+          </button>
+        </div>
+      </div>
+    </main>
+  )
+}
