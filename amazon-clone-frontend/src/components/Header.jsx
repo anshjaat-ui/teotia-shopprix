@@ -25,8 +25,8 @@ export default function Header() {
       {/* Top bar */}
       <div className="bg-navy text-white flex items-center gap-4 px-3 py-2">
         <Link to="/" className="flex items-center shrink-0 px-2 py-1 border border-transparent hover:border-white rounded-sm">
-          <span className="text-2xl font-bold tracking-tight">bazario</span>
-          <span className="text-accent-orange text-2xl leading-none -mt-2 ml-0.5">.</span>
+          <span className="text-lg sm:text-2xl font-bold tracking-tight whitespace-nowrap">Teotia Shopprix</span>
+          <span className="text-accent-orange text-lg sm:text-2xl leading-none -mt-2 ml-0.5">.</span>
         </Link>
 
         {/* Deliver to */}
@@ -48,7 +48,7 @@ export default function Header() {
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search bazario.in"
+            placeholder="Search teotiashopprix.com"
             className="flex-1 px-3 py-2 text-black text-sm focus:outline-none"
           />
           <button type="submit" className="bg-accent px-4 flex items-center justify-center hover:bg-accent-orange">
