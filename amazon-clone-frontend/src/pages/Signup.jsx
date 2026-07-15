@@ -77,7 +77,7 @@ export default function Signup() {
             disabled={submitting}
             className="w-full bg-accent hover:bg-accent-orange rounded-full py-1.5 text-sm font-medium border border-accent-orange/40 disabled:opacity-60"
           >
-            {submitting ? 'Creating account...' : 'Create your bazario account'}
+            {submitting ? 'Creating account...' : 'Create your Teotia Shopprix account'}
           </button>
         </form>
 
