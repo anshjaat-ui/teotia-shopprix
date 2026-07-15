@@ -26,7 +26,7 @@ export default function Cart() {
   if (!cart.items || cart.items.length === 0) {
     return (
       <main className="bg-surface min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
-        <p className="text-gray-600">Your bazario Cart is empty.</p>
+        <p className="text-gray-600">Your Teotia Shopprix Cart is empty.</p>
         <Link to="/" className="bg-accent hover:bg-accent-orange px-6 py-1.5 rounded-full text-sm font-medium border border-accent-orange/40">
           Continue shopping
         </Link>
