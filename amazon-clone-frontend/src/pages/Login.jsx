@@ -69,7 +69,7 @@ export default function Login() {
         </form>
 
         <p className="text-xs text-gray-600 mt-4">
-          New to bazario?{' '}
+          New to Teotia Shopprix?{' '}
           <Link to="/signup" className="text-link hover:underline">
             Create your account
           </Link>
