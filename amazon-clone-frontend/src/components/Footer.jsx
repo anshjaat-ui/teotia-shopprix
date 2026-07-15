@@ -12,7 +12,7 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-3">Get to Know Us</h4>
           <ul className="space-y-2 text-gray-300">
-            <li className="hover:underline cursor-pointer">About bazario</li>
+            <li className="hover:underline cursor-pointer">About Teotia Shopprix</li>
             <li className="hover:underline cursor-pointer">Careers</li>
             <li className="hover:underline cursor-pointer">Press Releases</li>
           </ul>
@@ -28,7 +28,7 @@ export default function Footer() {
         <div>
           <h4 className="font-bold mb-3">Make Money with Us</h4>
           <ul className="space-y-2 text-gray-300">
-            <li className="hover:underline cursor-pointer">Sell on bazario</li>
+            <li className="hover:underline cursor-pointer">Sell on Teotia Shopprix</li>
             <li className="hover:underline cursor-pointer">Become an Affiliate</li>
             <li className="hover:underline cursor-pointer">Advertise Your Products</li>
           </ul>
@@ -44,7 +44,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-gray-600 text-center text-xs text-gray-400 py-4">
-        © {new Date().getFullYear()} bazario.in — Demo project, not affiliated with Amazon
+        © {new Date().getFullYear()} Teotia Shopprix. All rights reserved.
       </div>
     </footer>
   )
