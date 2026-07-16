@@ -1,30 +1,33 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        navy: {
-          DEFAULT: '#131921',
-          light: '#232f3e',
-          lighter: '#37475a',
+        luxe: {
+          bg: '#0a0a0a',
+          panel: '#141414',
+          border: '#2a2a2a',
         },
-        accent: {
-          DEFAULT: '#febd69',
-          orange: '#ff9900',
+        gold: {
+          DEFAULT: '#D4AF37',
+          light: '#E8C766',
+          dark: '#A8862B',
         },
-        surface: '#eaeded',
-        link: '#007185',
-        price: '#b12704',
+        blush: {
+          from: '#FF2D55',
+          to: '#E91E63',
+        },
       },
       fontFamily: {
         sans: ['"Amazon Ember"', 'Arial', 'sans-serif'],
       },
       boxShadow: {
-        card: '0 2px 5px 0 rgba(213,217,217,.5)',
+        goldGlow: '0 0 0 1px rgba(212,175,55,0.4), 0 8px 24px -4px rgba(212,175,55,0.25)',
+        goldGlowLg: '0 0 0 1px rgba(212,175,55,0.5), 0 12px 40px -6px rgba(212,175,55,0.35)',
+      },
+      backgroundImage: {
+        'blush-gradient': 'linear-gradient(90deg, #FF2D55 0%, #E91E63 100%)',
       },
     },
   },
