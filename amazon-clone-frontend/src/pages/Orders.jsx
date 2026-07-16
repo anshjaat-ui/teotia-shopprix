@@ -9,31 +9,31 @@ export default function Orders() {
     api.get('/orders/my', true).then(setOrders).finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <main className="bg-surface min-h-[60vh] flex items-center justify-center text-gray-500">Loading orders...</main>
+  if (loading) return <main className="bg-luxe-bg min-h-[60vh] flex items-center justify-center text-gray-500">Loading orders...</main>
 
   if (orders.length === 0) {
-    return <main className="bg-surface min-h-[60vh] flex items-center justify-center text-gray-500">You have no orders yet.</main>
+    return <main className="bg-luxe-bg min-h-[60vh] flex items-center justify-center text-gray-500">You have no orders yet.</main>
   }
 
   return (
-    <main className="bg-surface min-h-[70vh] font-sans max-w-4xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-medium mb-4">Your Orders</h1>
+    <main className="bg-luxe-bg min-h-[70vh] font-sans max-w-4xl mx-auto px-4 py-6">
+      <h1 className="text-2xl font-medium mb-4 text-white">Your Orders</h1>
       <div className="space-y-4">
         {orders.map((order) => (
-          <div key={order._id} className="bg-white rounded-sm shadow-card p-4">
-            <div className="flex justify-between text-sm text-gray-600 border-b pb-2 mb-2">
+          <div key={order._id} className="bg-luxe-panel border border-gold/20 rounded-lg p-4">
+            <div className="flex justify-between text-sm text-gray-400 border-b border-gold/10 pb-2 mb-2">
               <span>Order #{order._id.slice(-8)}</span>
-              <span className={order.isPaid ? 'text-green-700' : order.paymentClaimed ? 'text-accent-orange' : 'text-price'}>
-                {order.isPaid ? 'Paid' : order.paymentClaimed ? 'Verification pending' : 'Payment not received'} · {order.status}
+              <span className={order.isPaid ? 'text-green-500' : 'text-blush-from'}>
+                {order.isPaid ? 'Paid' : 'Payment pending'} · {order.status}
               </span>
             </div>
             {order.items.map((item) => (
-              <div key={item.product} className="flex justify-between text-sm py-1">
+              <div key={item.product} className="flex justify-between text-sm py-1 text-gray-300">
                 <span>{item.name} × {item.qty}</span>
                 <span>₹{(item.price * item.qty).toLocaleString('en-IN')}</span>
               </div>
             ))}
-            <div className="flex justify-between font-bold text-sm border-t pt-2 mt-2">
+            <div className="flex justify-between font-bold text-sm border-t border-gold/10 pt-2 mt-2 text-white">
               <span>Total</span>
               <span>₹{order.totalPrice.toLocaleString('en-IN')}</span>
             </div>
