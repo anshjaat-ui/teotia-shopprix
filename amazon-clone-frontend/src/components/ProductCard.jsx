@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Star } from 'lucide-react'
+import { Star, Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -14,6 +14,7 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate()
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
+  const [wishlisted, setWishlisted] = useState(false)
 
   async function handleAddToCart() {
     if (!user) {
@@ -31,36 +32,41 @@ export default function ProductCard({ product }) {
   }
 
   return (
-    <div className="bg-white rounded-sm shadow-card p-3 flex flex-col hover:shadow-lg transition-shadow">
-      <img src={img} alt={name} className="h-40 object-contain mb-3" />
-      <p className="text-sm line-clamp-2 mb-1">{name}</p>
+    <div className="relative bg-luxe-panel border border-gold/20 rounded-lg p-3 flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-goldGlowLg hover:border-gold/50">
+      {discount > 0 && (
+        <span className="absolute top-2 left-2 z-10 bg-blush-gradient text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          {discount}% OFF
+        </span>
+      )}
+      <button
+        onClick={() => setWishlisted(!wishlisted)}
+        aria-label="Wishlist"
+        className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center"
+      >
+        <Heart size={16} className={wishlisted ? 'fill-blush-from text-blush-from' : 'text-gray-300'} />
+      </button>
+
+      <img src={img} alt={name} loading="lazy" className="h-40 object-contain mb-3 bg-white rounded" />
+      <p className="text-sm text-gray-200 line-clamp-2 mb-1">{name}</p>
 
       <div className="flex items-center gap-1 mb-1">
-        <div className="flex text-accent-orange">
+        <div className="flex text-gold">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} size={14} fill={i < Math.round(rating) ? '#ff9900' : 'none'} strokeWidth={1} />
+            <Star key={i} size={13} fill={i < Math.round(rating) ? '#D4AF37' : 'none'} strokeWidth={1} />
           ))}
         </div>
-        <span className="text-xs text-link">{numReviews.toLocaleString('en-IN')}</span>
+        <span className="text-xs text-gray-500">({numReviews.toLocaleString('en-IN')})</span>
       </div>
 
-      <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-xs align-top">₹</span>
-        <span className="text-xl font-medium">{price.toLocaleString('en-IN')}</span>
-        {mrp && (
-          <>
-            <span className="text-xs text-gray-500 line-through">₹{mrp.toLocaleString('en-IN')}</span>
-            <span className="text-xs text-green-700">{discount}% off</span>
-          </>
-        )}
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-lg font-semibold text-white">₹{price.toLocaleString('en-IN')}</span>
+        {mrp && <span className="text-xs text-gray-500 line-through">₹{mrp.toLocaleString('en-IN')}</span>}
       </div>
-
-      <p className="text-xs text-gray-600 mb-3">Free delivery by tomorrow</p>
 
       <button
         onClick={handleAddToCart}
         disabled={adding}
-        className="mt-auto bg-accent hover:bg-accent-orange text-sm font-medium py-1.5 rounded-full border border-accent-orange/40 disabled:opacity-60"
+        className="mt-auto bg-gold hover:bg-gold-light text-black text-sm font-semibold py-2.5 rounded-full disabled:opacity-60 transition-colors"
       >
         {added ? 'Added ✓' : adding ? 'Adding...' : 'Add to Cart'}
       </button>
