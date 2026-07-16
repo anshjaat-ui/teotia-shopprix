@@ -7,6 +7,7 @@ import Signup from './pages/Signup'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Orders from './pages/Orders'
+import ProductDetail from './pages/ProductDetail'
 import PrivacyPolicy from './pages/legal/PrivacyPolicy'
 import TermsAndConditions from './pages/legal/TermsAndConditions'
 import RefundPolicy from './pages/legal/RefundPolicy'
@@ -55,7 +56,7 @@ function Layout() {
             </ProtectedRoute>
           }
         />
-        <Route path="/product/:id" element={<Placeholder title="Product Detail" />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
