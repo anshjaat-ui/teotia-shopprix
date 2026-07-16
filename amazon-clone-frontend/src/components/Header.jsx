@@ -1,4 +1,4 @@
-import { Search, MapPin, ShoppingCart, Menu, ChevronDown } from 'lucide-react'
+import { Search, ShoppingCart, Menu, ChevronDown, X } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
@@ -14,97 +14,114 @@ export default function Header() {
   const { itemCount } = useCart()
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   function handleSearch(e) {
     e.preventDefault()
     navigate(`/?keyword=${encodeURIComponent(keyword)}`)
+    setMobileOpen(false)
   }
 
   return (
-    <header className="sticky top-0 z-50 font-sans">
-      {/* Top bar */}
-      <div className="bg-navy text-white flex items-center gap-4 px-3 py-2">
-        <Link to="/" className="flex items-center shrink-0 px-2 py-1 border border-transparent hover:border-white rounded-sm">
-          <span className="text-lg sm:text-2xl font-bold tracking-tight whitespace-nowrap">Teotia Shopprix</span>
-          <span className="text-accent-orange text-lg sm:text-2xl leading-none -mt-2 ml-0.5">.</span>
+    <header className="sticky top-0 z-50 font-sans bg-luxe-bg border-b border-gold/30">
+      <div className="flex items-center gap-3 px-3 py-3">
+        <button className="md:hidden text-gold" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+          {mobileOpen ? <X size={26} /> : <Menu size={26} />}
+        </button>
+
+        <Link to="/" className="flex items-center shrink-0">
+          <span className="text-lg sm:text-2xl font-bold tracking-wide text-gold whitespace-nowrap drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+            Teotia Shopprix
+          </span>
         </Link>
 
-        {/* Deliver to */}
-        <div className="hidden md:flex items-center gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm cursor-pointer">
-          <MapPin size={18} className="mt-2" />
-          <div className="text-xs leading-tight">
-            <div className="text-gray-300">Deliver to Meerut</div>
-            <div className="font-bold">Uttar Pradesh 250001</div>
-          </div>
-        </div>
-
-        {/* Search bar */}
-        <form onSubmit={handleSearch} className="flex flex-1 max-w-3xl rounded-md overflow-hidden">
-          <select className="hidden sm:block bg-gray-100 text-xs text-gray-700 px-2 border-r border-gray-300 focus:outline-none">
-            <option>All</option>
-            {categories.map(c => <option key={c}>{c}</option>)}
-          </select>
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl rounded-full overflow-hidden border border-gold/40">
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search teotiashopprix.com"
-            className="flex-1 px-3 py-2 text-black text-sm focus:outline-none"
+            placeholder="Search Teotia Shopprix"
+            className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm focus:outline-none placeholder:text-gray-500"
           />
-          <button type="submit" className="bg-accent px-4 flex items-center justify-center hover:bg-accent-orange">
-            <Search size={20} className="text-navy" />
+          <button type="submit" className="bg-gold px-4 flex items-center justify-center hover:bg-gold-light">
+            <Search size={18} className="text-black" />
           </button>
         </form>
 
-        {/* Account & Orders */}
-        {user ? (
-          <div className="hidden md:flex items-center gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm cursor-pointer group relative">
-            <div className="text-xs leading-tight">
-              <div className="text-gray-300">Hello, {user.name.split(' ')[0]}</div>
-              <div className="font-bold flex items-center gap-0.5">Account & Lists <ChevronDown size={12} /></div>
+        <div className="ml-auto flex items-center gap-4">
+          {user ? (
+            <div className="hidden md:flex items-center gap-1 cursor-pointer group relative text-gray-200">
+              <span className="text-sm">Hi, {user.name.split(' ')[0]}</span>
+              <ChevronDown size={14} />
+              <div className="absolute top-full right-0 hidden group-hover:block bg-luxe-panel border border-gold/30 shadow-goldGlow rounded-md py-2 w-40 mt-2">
+                <Link to="/orders" className="block px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Your Orders</Link>
+                <button onClick={logout} className="w-full text-left px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Sign out</button>
+              </div>
             </div>
-            <div className="absolute top-full right-0 hidden group-hover:block bg-white text-navy shadow-lg rounded-sm py-2 w-40 mt-1">
-              <Link to="/orders" className="block px-3 py-1.5 text-sm hover:bg-gray-100">Your Orders</Link>
-              <button onClick={logout} className="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-100">Sign out</button>
-            </div>
-          </div>
-        ) : (
-          <Link to="/login" className="hidden md:flex items-center gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm cursor-pointer">
-            <div className="text-xs leading-tight">
-              <div className="text-gray-300">Hello, sign in</div>
-              <div className="font-bold flex items-center gap-0.5">Account & Lists <ChevronDown size={12} /></div>
-            </div>
+          ) : (
+            <Link to="/login" className="hidden md:block text-sm text-gray-200 hover:text-gold">Sign in</Link>
+          )}
+
+          <Link to="/cart" className="relative text-gray-200 hover:text-gold">
+            <ShoppingCart size={26} />
+            {itemCount > 0 && (
+              <span className="absolute -top-1 -right-2 bg-blush-gradient text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
           </Link>
-        )}
-
-        <Link to="/orders" className="hidden md:flex flex-col text-xs leading-tight px-2 py-1 border border-transparent hover:border-white rounded-sm cursor-pointer">
-          <span className="text-gray-300">Returns</span>
-          <span className="font-bold">& Orders</span>
-        </Link>
-
-        {/* Cart */}
-        <Link to="/cart" className="flex items-end gap-1 px-2 py-1 border border-transparent hover:border-white rounded-sm relative">
-          <ShoppingCart size={30} />
-          <span className="absolute top-0 left-4 text-accent-orange font-bold text-sm">{itemCount}</span>
-          <span className="font-bold hidden sm:inline">Cart</span>
-        </Link>
+        </div>
       </div>
 
-      {/* Category strip */}
-      <div className="bg-navy-light text-white text-sm flex items-center gap-4 px-3 py-1.5 overflow-x-auto">
-        <span className="flex items-center gap-1 font-bold cursor-pointer hover:outline hover:outline-1 hover:outline-white px-1 shrink-0">
-          <Menu size={18} /> All
-        </span>
+      <form onSubmit={handleSearch} className="md:hidden flex px-3 pb-3">
+        <input
+          type="text"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="Search Teotia Shopprix"
+          className="flex-1 px-4 py-2.5 bg-luxe-panel border border-gold/30 rounded-l-full text-white text-sm focus:outline-none placeholder:text-gray-500"
+        />
+        <button type="submit" className="bg-gold px-4 rounded-r-full flex items-center justify-center">
+          <Search size={18} className="text-black" />
+        </button>
+      </form>
+
+      <div className="hidden md:flex items-center gap-5 px-3 py-2 border-t border-gold/10 overflow-x-auto">
         {categories.map(c => (
           <span
             key={c}
             onClick={() => navigate(`/?category=${encodeURIComponent(c)}`)}
-            className="cursor-pointer hover:outline hover:outline-1 hover:outline-white px-1 whitespace-nowrap shrink-0"
+            className="cursor-pointer text-sm text-gray-300 hover:text-gold whitespace-nowrap shrink-0"
           >
             {c}
           </span>
         ))}
       </div>
+
+      {mobileOpen && (
+        <div className="md:hidden border-t border-gold/20 bg-luxe-panel px-4 py-3 space-y-3">
+          {user ? (
+            <>
+              <p className="text-gray-200 text-sm">Hi, {user.name.split(' ')[0]}</p>
+              <Link to="/orders" onClick={() => setMobileOpen(false)} className="block text-gray-300 text-sm py-1">Your Orders</Link>
+              <button onClick={() => { logout(); setMobileOpen(false) }} className="block text-gray-300 text-sm py-1">Sign out</button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-gold text-sm py-1">Sign in</Link>
+          )}
+          <div className="border-t border-gold/10 pt-2">
+            {categories.map(c => (
+              <span
+                key={c}
+                onClick={() => { navigate(`/?category=${encodeURIComponent(c)}`); setMobileOpen(false) }}
+                className="block cursor-pointer text-sm text-gray-300 hover:text-gold py-1.5"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   )
 }
