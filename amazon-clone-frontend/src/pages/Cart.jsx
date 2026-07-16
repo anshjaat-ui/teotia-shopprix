@@ -10,9 +10,9 @@ export default function Cart() {
 
   if (!user) {
     return (
-      <main className="bg-surface min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
-        <p className="text-gray-600">Sign in to see items in your cart.</p>
-        <Link to="/login" className="bg-accent hover:bg-accent-orange px-6 py-1.5 rounded-full text-sm font-medium border border-accent-orange/40">
+      <main className="bg-luxe-bg min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
+        <p className="text-gray-400">Sign in to see items in your cart.</p>
+        <Link to="/login" className="bg-gold hover:bg-gold-light px-6 py-1.5 rounded-full text-sm font-medium border border-gold/40">
           Sign in
         </Link>
       </main>
@@ -20,14 +20,14 @@ export default function Cart() {
   }
 
   if (loading) {
-    return <main className="bg-surface min-h-[60vh] flex items-center justify-center text-gray-500">Loading cart...</main>
+    return <main className="bg-luxe-bg min-h-[60vh] flex items-center justify-center text-gray-500">Loading cart...</main>
   }
 
   if (!cart.items || cart.items.length === 0) {
     return (
-      <main className="bg-surface min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
-        <p className="text-gray-600">Your Teotia Shopprix Cart is empty.</p>
-        <Link to="/" className="bg-accent hover:bg-accent-orange px-6 py-1.5 rounded-full text-sm font-medium border border-accent-orange/40">
+      <main className="bg-luxe-bg min-h-[60vh] flex flex-col items-center justify-center gap-3 font-sans">
+        <p className="text-gray-400">Your Teotia Shopprix Cart is empty.</p>
+        <Link to="/" className="bg-gold hover:bg-gold-light px-6 py-1.5 rounded-full text-sm font-medium border border-gold/40">
           Continue shopping
         </Link>
       </main>
@@ -35,17 +35,17 @@ export default function Cart() {
   }
 
   return (
-    <main className="bg-surface min-h-[70vh] font-sans">
+    <main className="bg-luxe-bg min-h-[70vh] font-sans">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4 px-4 py-6">
-        <div className="lg:col-span-2 bg-white p-4 rounded-sm shadow-card">
-          <h1 className="text-2xl font-medium mb-4 border-b pb-3">Shopping Cart</h1>
+        <div className="lg:col-span-2 bg-luxe-panel border border-gold/20 p-4 rounded-lg">
+          <h1 className="text-2xl font-medium mb-4 text-white border-b pb-3">Shopping Cart</h1>
 
           {cart.items.map((item) => (
             <div key={item.product._id} className="flex gap-4 py-4 border-b last:border-0">
               <img src={item.product.images?.[0]} alt={item.product.name} className="w-24 h-24 object-contain" />
               <div className="flex-1">
-                <p className="text-sm font-medium mb-1">{item.product.name}</p>
-                <p className="text-price font-medium mb-2">₹{item.product.price.toLocaleString('en-IN')}</p>
+                <p className="text-sm font-medium mb-1 text-gray-200">{item.product.name}</p>
+                <p className="text-blush-from font-medium mb-2">₹{item.product.price.toLocaleString('en-IN')}</p>
 
                 <div className="flex items-center gap-3">
                   <div className="flex items-center border rounded-full overflow-hidden">
@@ -65,7 +65,7 @@ export default function Cart() {
                   </div>
                   <button
                     onClick={() => removeFromCart(item.product._id)}
-                    className="text-xs text-link hover:underline flex items-center gap-1"
+                    className="text-xs text-gold hover:underline flex items-center gap-1"
                   >
                     <Trash2 size={14} /> Delete
                   </button>
@@ -75,14 +75,14 @@ export default function Cart() {
           ))}
         </div>
 
-        <div className="bg-white p-4 rounded-sm shadow-card h-fit">
-          <p className="text-sm mb-2">
+        <div className="bg-luxe-panel border border-gold/20 p-4 rounded-lg h-fit">
+          <p className="text-sm mb-2 text-gray-200">
             Subtotal ({cart.items.reduce((s, i) => s + i.qty, 0)} items):{' '}
-            <span className="font-bold">₹{subtotal.toLocaleString('en-IN')}</span>
+            <span className="font-bold text-white">₹{subtotal.toLocaleString('en-IN')}</span>
           </p>
           <button
             onClick={() => navigate('/checkout')}
-            className="w-full bg-accent hover:bg-accent-orange rounded-full py-1.5 text-sm font-medium border border-accent-orange/40"
+            className="w-full bg-gold hover:bg-gold-light rounded-full py-1.5 text-sm font-medium border border-gold/40"
           >
             Proceed to Buy
           </button>
