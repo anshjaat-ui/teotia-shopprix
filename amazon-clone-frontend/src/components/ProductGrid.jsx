@@ -29,22 +29,22 @@ export default function ProductGrid() {
     ? `Results for "${keyword}"`
     : category
     ? category
-    : "Today's Deals for you"
+    : "Trending Now"
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-xl font-bold mb-4">{heading}</h2>
+    <div className="max-w-7xl mx-auto px-4 py-8 bg-luxe-bg">
+      <h2 className="text-xl font-bold text-white mb-4">{heading}</h2>
 
-      {loading && <p className="text-gray-500 text-sm">Loading products...</p>}
+      {loading && <p className="text-gray-400 text-sm">Loading products...</p>}
 
       {error && (
-        <p className="text-sm text-price">
+        <p className="text-sm text-blush-from">
           Products load nahi ho paaye. Backend chal raha hai aur VITE_API_URL sahi hai? ({error})
         </p>
       )}
 
       {!loading && !error && products.length === 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-400">
           Koi product nahi mila. Backend mein <code>npm run seed</code> chalao ya search badlo.
         </p>
       )}
