@@ -31,9 +31,9 @@ export default function Signup() {
   }
 
   return (
-    <main className="bg-surface min-h-[80vh] flex justify-center py-10 px-4 font-sans">
-      <div className="bg-white border border-gray-300 rounded-sm p-6 w-full max-w-sm h-fit">
-        <h1 className="text-2xl font-medium mb-4">Create account</h1>
+    <main className="bg-luxe-bg min-h-[80vh] flex justify-center py-10 px-4 font-sans">
+      <div className="bg-luxe-panel border border-gold/20 rounded-sm p-6 w-full max-w-sm h-fit">
+        <h1 className="text-2xl font-medium mb-4 text-white">Create account</h1>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded mb-3">
@@ -43,47 +43,47 @@ export default function Signup() {
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="text-sm font-medium block mb-1">Your name</label>
+            <label className="text-sm font-medium block mb-1 text-gray-300">Your name</label>
             <input
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-400 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-orange"
+              className="w-full border border-gold/30 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold"
             />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Email</label>
+            <label className="text-sm font-medium block mb-1 text-gray-300">Email</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-400 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-orange"
+              className="w-full border border-gold/30 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold"
             />
           </div>
           <div>
-            <label className="text-sm font-medium block mb-1">Password</label>
+            <label className="text-sm font-medium block mb-1 text-gray-300">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-400 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-accent-orange"
+              className="w-full border border-gold/30 rounded-sm px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold"
             />
             <p className="text-xs text-gray-500 mt-1">At least 6 characters</p>
           </div>
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-accent hover:bg-accent-orange rounded-full py-1.5 text-sm font-medium border border-accent-orange/40 disabled:opacity-60"
+            className="w-full bg-gold hover:bg-gold-light rounded-full py-1.5 text-sm font-medium border border-gold/40 disabled:opacity-60"
           >
             {submitting ? 'Creating account...' : 'Create your Teotia Shopprix account'}
           </button>
         </form>
 
-        <p className="text-xs text-gray-600 mt-4">
+        <p className="text-xs text-gray-400 mt-4">
           Already have an account?{' '}
-          <Link to="/login" className="text-link hover:underline">
+          <Link to="/login" className="text-gold hover:underline">
             Sign in
           </Link>
         </p>
