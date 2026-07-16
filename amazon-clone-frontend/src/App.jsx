@@ -7,6 +7,11 @@ import Signup from './pages/Signup'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Orders from './pages/Orders'
+import PrivacyPolicy from './pages/legal/PrivacyPolicy'
+import TermsAndConditions from './pages/legal/TermsAndConditions'
+import RefundPolicy from './pages/legal/RefundPolicy'
+import ShippingPolicy from './pages/legal/ShippingPolicy'
+import ContactUs from './pages/legal/ContactUs'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 
@@ -51,6 +56,11 @@ function Layout() {
           }
         />
         <Route path="/product/:id" element={<Placeholder title="Product Detail" />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/shipping-policy" element={<ShippingPolicy />} />
+        <Route path="/contact" element={<ContactUs />} />
       </Routes>
       <Footer />
     </div>
