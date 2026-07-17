@@ -14,11 +14,16 @@ export default function AboutUs() {
             effortless. From browsing to checkout to delivery, every step is designed with our
             customers in mind.
           </p>
-          <p>
-            Have questions or feedback? We'd love to hear from you — visit our
-            <a href="/contact" className="text-gold hover:underline"> Contact Us</a> page.
-          </p>
-        </div>
+         <p>
+  Have questions or feedback? We'd love to hear from you — visit our{" "}
+  <a
+    href="mailto:contact@teotiashopprix.com"
+    className="text-gold hover:underline"
+  >
+    Contact Us
+  </a>{" "}
+  page.
+</p>
       </div>
     </main>
   )
