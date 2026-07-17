@@ -16,7 +16,8 @@ export default function ProductCard({ product }) {
   const [added, setAdded] = useState(false)
   const [wishlisted, setWishlisted] = useState(false)
 
-  async function handleAddToCart() {
+  async function handleAddToCart(e) {
+    e.stopPropagation()
     if (!user) {
       navigate('/login', { state: { from: '/' } })
       return
@@ -31,15 +32,23 @@ export default function ProductCard({ product }) {
     }
   }
 
+  function handleWishlist(e) {
+    e.stopPropagation()
+    setWishlisted(!wishlisted)
+  }
+
   return (
-    <div className="relative bg-luxe-panel border border-gold/20 rounded-lg p-3 flex flex-col transition-all duration-200 hover:-translate-y-1 hover:shadow-goldGlowLg hover:border-gold/50">
+    <div
+      onClick={() => navigate(`/product/${_id}`)}
+      className="relative bg-luxe-panel border border-gold/20 rounded-lg p-3 flex flex-col cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-goldGlowLg hover:border-gold/50"
+    >
       {discount > 0 && (
         <span className="absolute top-2 left-2 z-10 bg-blush-gradient text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
           {discount}% OFF
         </span>
       )}
       <button
-        onClick={() => setWishlisted(!wishlisted)}
+        onClick={handleWishlist}
         aria-label="Wishlist"
         className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/50 flex items-center justify-center"
       >
