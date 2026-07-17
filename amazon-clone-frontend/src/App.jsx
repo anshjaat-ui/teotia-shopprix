@@ -8,6 +8,11 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import Orders from './pages/Orders'
 import ProductDetail from './pages/ProductDetail'
+import AboutUs from './pages/legal/AboutUs'
+import Careers from './pages/legal/Careers'
+import PressReleases from './pages/legal/PressReleases'
+import SellWithUs from './pages/legal/SellWithUs'
+import Affiliate from './pages/legal/Affiliate'
 import PrivacyPolicy from './pages/legal/PrivacyPolicy'
 import TermsAndConditions from './pages/legal/TermsAndConditions'
 import RefundPolicy from './pages/legal/RefundPolicy'
@@ -49,6 +54,11 @@ function Layout() {
           }
         />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/press" element={<PressReleases />} />
+        <Route path="/sell-with-us" element={<SellWithUs />} />
+        <Route path="/affiliate" element={<Affiliate />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/refund-policy" element={<RefundPolicy />} />
