@@ -10,13 +10,19 @@ export default function Affiliate() {
             Earn commission by promoting Teotia Shopprix products on your blog, YouTube channel,
             or social media. Share your unique link, and earn a percentage on every sale you refer.
           </p>
+
           <p>Interested in joining our affiliate program? Reach out to us:</p>
-          
+
+          {/* ✅ FIX START */}
+          <a
             href="mailto:affiliates@teotiashopprix.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
-            <Mail size={16} /> affiliates@teotiashopprix.com
+            <Mail size={16} />
+            affiliates@teotiashopprix.com
           </a>
+          {/* ✅ FIX END */}
+
         </div>
       </div>
     </main>
