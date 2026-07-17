@@ -23,14 +23,6 @@ function ProtectedRoute({ children }) {
   return children
 }
 
-function Placeholder({ title }) {
-  return (
-    <main className="bg-surface min-h-[60vh] flex items-center justify-center">
-      <p className="text-gray-500">{title} — coming soon</p>
-    </main>
-  )
-}
-
 function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
