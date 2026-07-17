@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom'
 
+const SOCIAL = {
+  facebook: 'https://facebook.com/teotiashopprix',
+  twitter: 'https://twitter.com/teotiashopprix',
+  instagram: 'https://instagram.com/teotiashopprix',
+}
+
 export default function Footer() {
   return (
     <footer className="bg-luxe-panel text-white mt-8 font-sans border-t border-gold/20">
@@ -14,24 +20,24 @@ export default function Footer() {
         <div>
           <h4 className="font-bold text-gold mb-3">Get to Know Us</h4>
           <ul className="space-y-2 text-gray-400">
-            <li className="hover:text-gold cursor-pointer">About Teotia Shopprix</li>
-            <li className="hover:text-gold cursor-pointer">Careers</li>
-            <li className="hover:text-gold cursor-pointer">Press Releases</li>
+            <li><Link to="/about" className="hover:text-gold">About Teotia Shopprix</Link></li>
+            <li><Link to="/careers" className="hover:text-gold">Careers</Link></li>
+            <li><Link to="/press" className="hover:text-gold">Press Releases</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="font-bold text-gold mb-3">Connect with Us</h4>
           <ul className="space-y-2 text-gray-400">
-            <li className="hover:text-gold cursor-pointer">Facebook</li>
-            <li className="hover:text-gold cursor-pointer">Twitter</li>
-            <li className="hover:text-gold cursor-pointer">Instagram</li>
+            <li><a href={SOCIAL.facebook} target="_blank" rel="noreferrer" className="hover:text-gold">Facebook</a></li>
+            <li><a href={SOCIAL.twitter} target="_blank" rel="noreferrer" className="hover:text-gold">Twitter</a></li>
+            <li><a href={SOCIAL.instagram} target="_blank" rel="noreferrer" className="hover:text-gold">Instagram</a></li>
           </ul>
         </div>
         <div>
           <h4 className="font-bold text-gold mb-3">Make Money with Us</h4>
           <ul className="space-y-2 text-gray-400">
-            <li className="hover:text-gold cursor-pointer">Sell on Teotia Shopprix</li>
-            <li className="hover:text-gold cursor-pointer">Become an Affiliate</li>
+            <li><Link to="/sell-with-us" className="hover:text-gold">Sell on Teotia Shopprix</Link></li>
+            <li><Link to="/affiliate" className="hover:text-gold">Become an Affiliate</Link></li>
           </ul>
         </div>
         <div>
