@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ShieldCheck, Truck, RotateCcw, Tag, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../api/client'
@@ -32,8 +33,38 @@ export default function Checkout() {
   const [placing, setPlacing] = useState(false)
   const [error, setError] = useState('')
 
+  const [couponInput, setCouponInput] = useState('')
+  const [appliedCoupon, setAppliedCoupon] = useState(null)
+  const [couponError, setCouponError] = useState('')
+  const [applyingCoupon, setApplyingCoupon] = useState(false)
+
+  const shippingPrice = subtotal > 499 ? 0 : 49
+  const discount = appliedCoupon?.discount || 0
+  const total = Math.max(subtotal + shippingPrice - discount, 0)
+
   function handleChange(e) {
     setAddress({ ...address, [e.target.name]: e.target.value })
+  }
+
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return
+    setCouponError('')
+    setApplyingCoupon(true)
+    try {
+      const data = await api.post('/coupons/validate', { code: couponInput.trim(), orderValue: subtotal }, true)
+      setAppliedCoupon({ code: data.code, discount: data.discount })
+    } catch (err) {
+      setAppliedCoupon(null)
+      setCouponError(err.message)
+    } finally {
+      setApplyingCoupon(false)
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null)
+    setCouponInput('')
+    setCouponError('')
   }
 
   async function handlePayment(e) {
@@ -43,7 +74,11 @@ export default function Checkout() {
 
     try {
       const items = cart.items.map((i) => ({ product: i.product._id, qty: i.qty }))
-      const orderData = await api.post('/orders', { items, shippingAddress: address }, true)
+      const orderData = await api.post(
+        '/orders',
+        { items, shippingAddress: address, couponCode: appliedCoupon?.code },
+        true
+      )
 
       const loaded = await loadRazorpayScript()
       if (!loaded) {
@@ -81,7 +116,7 @@ export default function Checkout() {
           name: address.fullName,
           contact: address.phone,
         },
-        theme: { color: '#febd69' },
+        theme: { color: '#D4AF37' },
       }
 
       const rzp = new window.Razorpay(options)
@@ -104,19 +139,49 @@ export default function Checkout() {
           <h1 className="text-xl font-medium mb-2 text-white">Shipping Address</h1>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-3 py-2 rounded">
+            <div className="bg-blush-from/10 border border-blush-from/30 text-blush-from text-sm px-3 py-2 rounded">
               {error}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <input name="fullName" required placeholder="Full name" value={address.fullName} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5 col-span-2" />
-            <input name="phone" required placeholder="Phone number" value={address.phone} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5 col-span-2" />
-            <input name="line1" required placeholder="Address line 1" value={address.line1} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5 col-span-2" />
-            <input name="line2" placeholder="Address line 2 (optional)" value={address.line2} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5 col-span-2" />
-            <input name="city" required placeholder="City" value={address.city} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5" />
-            <input name="state" required placeholder="State" value={address.state} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5" />
-            <input name="pincode" required placeholder="Pincode" value={address.pincode} onChange={handleChange} className="border border-gold/30 rounded-sm px-2 py-1.5 col-span-2" />
+            <input name="fullName" required placeholder="Full name" value={address.fullName} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 col-span-2" />
+            <input name="phone" required placeholder="Phone number" value={address.phone} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 col-span-2" />
+            <input name="line1" required placeholder="Address line 1" value={address.line1} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 col-span-2" />
+            <input name="line2" placeholder="Address line 2 (optional)" value={address.line2} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 col-span-2" />
+            <input name="city" required placeholder="City" value={address.city} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5" />
+            <input name="state" required placeholder="State" value={address.state} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5" />
+            <input name="pincode" required placeholder="Pincode" value={address.pincode} onChange={handleChange} className="bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 col-span-2" />
+          </div>
+
+          <div className="border-t border-gold/10 pt-3">
+            <label className="text-sm font-medium text-gray-300 flex items-center gap-1 mb-2">
+              <Tag size={14} className="text-gold" /> Have a coupon?
+            </label>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 rounded-md px-3 py-2 text-sm">
+                <span className="text-green-400">"{appliedCoupon.code}" applied — you saved ₹{appliedCoupon.discount.toLocaleString('en-IN')}</span>
+                <button type="button" onClick={removeCoupon}><X size={16} className="text-gray-400" /></button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Enter coupon code"
+                  className="flex-1 bg-black/40 border border-gold/30 text-white rounded-sm px-2 py-1.5 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={applyingCoupon}
+                  className="bg-white/5 hover:bg-white/10 border border-gold/30 text-gold px-4 rounded-sm text-sm disabled:opacity-60"
+                >
+                  {applyingCoupon ? 'Checking...' : 'Apply'}
+                </button>
+              </div>
+            )}
+            {couponError && <p className="text-xs text-blush-from mt-1">{couponError}</p>}
           </div>
 
           <button
@@ -124,17 +189,35 @@ export default function Checkout() {
             disabled={placing}
             className="w-full bg-gold hover:bg-gold-light rounded-full py-2 text-sm font-medium border border-gold/40 disabled:opacity-60"
           >
-            {placing ? 'Processing...' : `Pay ₹${(subtotal + (subtotal > 499 ? 0 : 49)).toLocaleString('en-IN')} with Razorpay`}
+            {placing ? 'Processing...' : `Pay ₹${total.toLocaleString('en-IN')} with Razorpay`}
           </button>
+
+          <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gold/10">
+            <div className="flex flex-col items-center gap-1 text-gray-400">
+              <ShieldCheck size={18} className="text-gold" />
+              <span className="text-[10px] text-center">100% Secure Payment</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 text-gray-400">
+              <Truck size={18} className="text-gold" />
+              <span className="text-[10px] text-center">Fast Delivery</span>
+            </div>
+            <div className="flex flex-col items-center gap-1 text-gray-400">
+              <RotateCcw size={18} className="text-gold" />
+              <span className="text-[10px] text-center">Easy 7-Day Returns</span>
+            </div>
+          </div>
         </form>
 
         <div className="bg-luxe-panel border border-gold/20 p-5 rounded-lg h-fit space-y-2 text-sm">
           <h2 className="font-medium text-base mb-2 text-white">Order Summary</h2>
           <div className="flex justify-between text-gray-300"><span>Items:</span><span>₹{subtotal.toLocaleString('en-IN')}</span></div>
-          <div className="flex justify-between text-gray-300"><span>Shipping:</span><span>{subtotal > 499 ? 'FREE' : '₹49'}</span></div>
-          <div className="flex justify-between font-bold text-blush-from border-t pt-2">
+          <div className="flex justify-between text-gray-300"><span>Shipping:</span><span>{shippingPrice === 0 ? 'FREE' : `₹${shippingPrice}`}</span></div>
+          {discount > 0 && (
+            <div className="flex justify-between text-green-400"><span>Coupon Discount:</span><span>-₹{discount.toLocaleString('en-IN')}</span></div>
+          )}
+          <div className="flex justify-between font-bold text-blush-from border-t border-gold/10 pt-2">
             <span>Order Total:</span>
-            <span>₹{(subtotal + (subtotal > 499 ? 0 : 49)).toLocaleString('en-IN')}</span>
+            <span>₹{total.toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>
