@@ -3,18 +3,19 @@ import { Star, Heart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useWishlist } from '../context/WishlistContext'
 
 export default function ProductCard({ product }) {
-  const { name, price, mrp, rating = 0, numReviews = 0, images, _id } = product
+  const { name, price, mrp, rating = 0, numReviews = 0, images, _id, stock } = product
   const discount = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0
   const img = images?.[0]
 
   const { addToCart } = useCart()
   const { user } = useAuth()
+  const { isWishlisted, toggle } = useWishlist()
   const navigate = useNavigate()
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
-  const [wishlisted, setWishlisted] = useState(false)
 
   async function handleAddToCart(e) {
     e.stopPropagation()
@@ -32,10 +33,20 @@ export default function ProductCard({ product }) {
     }
   }
 
-  function handleWishlist(e) {
+  async function handleWishlist(e) {
     e.stopPropagation()
-    setWishlisted(!wishlisted)
+    if (!user) {
+      navigate('/login', { state: { from: '/' } })
+      return
+    }
+    try {
+      await toggle(_id)
+    } catch {
+      // ignore
+    }
   }
+
+  const wishlisted = isWishlisted(_id)
 
   return (
     <div
@@ -67,17 +78,24 @@ export default function ProductCard({ product }) {
         <span className="text-xs text-gray-500">({numReviews.toLocaleString('en-IN')})</span>
       </div>
 
-      <div className="flex items-baseline gap-2 mb-2">
+      <div className="flex items-baseline gap-2 mb-1">
         <span className="text-lg font-semibold text-white">₹{price.toLocaleString('en-IN')}</span>
         {mrp && <span className="text-xs text-gray-500 line-through">₹{mrp.toLocaleString('en-IN')}</span>}
       </div>
 
+      {stock > 0 && stock <= 5 && (
+        <p className="text-xs text-blush-from font-medium mb-2">Only {stock} left!</p>
+      )}
+      {stock === 0 && (
+        <p className="text-xs text-gray-500 font-medium mb-2">Out of stock</p>
+      )}
+
       <button
         onClick={handleAddToCart}
-        disabled={adding}
+        disabled={adding || stock === 0}
         className="mt-auto bg-gold hover:bg-gold-light text-black text-sm font-semibold py-2.5 rounded-full disabled:opacity-60 transition-colors"
       >
-        {added ? 'Added ✓' : adding ? 'Adding...' : 'Add to Cart'}
+        {added ? 'Added ✓' : adding ? 'Adding...' : stock === 0 ? 'Out of Stock' : 'Add to Cart'}
       </button>
     </div>
   )
