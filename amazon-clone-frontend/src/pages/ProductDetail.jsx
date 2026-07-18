@@ -1,31 +1,92 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw } from 'lucide-react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw, Heart } from 'lucide-react'
 import { api } from '../api/client'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useWishlist } from '../context/WishlistContext'
+
+function ZoomImage({ src, alt }) {
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
+  const [zooming, setZooming] = useState(false)
+
+  function handleMouseMove(e) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width) * 100
+    const y = ((e.clientY - rect.top) / rect.height) * 100
+    setZoomPos({ x, y })
+  }
+
+  return (
+    <div
+      className="bg-white rounded-lg overflow-hidden mb-3 aspect-square flex items-center justify-center relative cursor-zoom-in"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setZooming(true)}
+      onMouseLeave={() => setZooming(false)}
+    >
+      <img
+        src={src}
+        alt={alt}
+        className="max-h-full max-w-full object-contain transition-transform duration-150"
+        style={
+          zooming
+            ? { transform: 'scale(2)', transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` }
+            : {}
+        }
+      />
+    </div>
+  )
+}
+
+function ReviewStars({ rating, setRating }) {
+  return (
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button key={n} type="button" onClick={() => setRating(n)}>
+          <Star size={22} className="text-gold" fill={n <= rating ? '#D4AF37' : 'none'} strokeWidth={1.5} />
+        </button>
+      ))}
+    </div>
+  )
+}
 
 export default function ProductDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { addToCart } = useCart()
   const { user } = useAuth()
+  const { isWishlisted, toggle } = useWishlist()
 
   const [product, setProduct] = useState(null)
+  const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeImg, setActiveImg] = useState(0)
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
 
-  useEffect(() => {
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewError, setReviewError] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+
+  function loadProduct() {
     setLoading(true)
     setActiveImg(0)
     api
       .get(`/products/${id}`)
-      .then(setProduct)
+      .then(async (data) => {
+        setProduct(data)
+        const list = await api.get(`/products?category=${encodeURIComponent(data.category)}`)
+        setRelated(list.products.filter((p) => p._id !== data._id).slice(0, 4))
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   async function handleAddToCart() {
@@ -43,6 +104,38 @@ export default function ProductDetail() {
     }
   }
 
+  async function handleWishlist() {
+    if (!user) {
+      navigate('/login', { state: { from: `/product/${id}` } })
+      return
+    }
+    await toggle(product._id)
+  }
+
+  async function handleReviewSubmit(e) {
+    e.preventDefault()
+    setReviewError('')
+    if (!user) {
+      navigate('/login', { state: { from: `/product/${id}` } })
+      return
+    }
+    if (reviewRating === 0) {
+      setReviewError('Please select a star rating')
+      return
+    }
+    setSubmittingReview(true)
+    try {
+      await api.post(`/products/${id}/reviews`, { rating: reviewRating, comment: reviewComment }, true)
+      setReviewRating(0)
+      setReviewComment('')
+      loadProduct()
+    } catch (err) {
+      setReviewError(err.message)
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
+
   if (loading) {
     return <main className="bg-luxe-bg min-h-[70vh] flex items-center justify-center text-gray-400">Loading product...</main>
   }
@@ -56,16 +149,15 @@ export default function ProductDetail() {
     )
   }
 
-  const { name, description, price, mrp, rating = 0, numReviews = 0, images = [], stock, category, brand } = product
+  const { name, description, price, mrp, rating = 0, numReviews = 0, images = [], stock, category, brand, reviews = [] } = product
   const discount = mrp ? Math.round(((mrp - price) / mrp) * 100) : 0
+  const wishlisted = isWishlisted(product._id)
 
   return (
     <main className="bg-luxe-bg min-h-[70vh] font-sans">
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <div className="bg-white rounded-lg overflow-hidden mb-3 aspect-square flex items-center justify-center">
-            <img src={images[activeImg]} alt={name} className="max-h-full max-w-full object-contain" />
-          </div>
+          <ZoomImage src={images[activeImg]} alt={name} />
           {images.length > 1 && (
             <div className="flex gap-2">
               {images.map((img, i) => (
@@ -84,8 +176,15 @@ export default function ProductDetail() {
         </div>
 
         <div>
-          {category && <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{category}{brand ? ` · ${brand}` : ''}</p>}
-          <h1 className="text-xl sm:text-2xl font-semibold text-white mb-2">{name}</h1>
+          <div className="flex justify-between items-start">
+            <div>
+              {category && <p className="text-xs text-gray-500 mb-1 uppercase tracking-wide">{category}{brand ? ` · ${brand}` : ''}</p>}
+              <h1 className="text-xl sm:text-2xl font-semibold text-white mb-2">{name}</h1>
+            </div>
+            <button onClick={handleWishlist} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0" aria-label="Wishlist">
+              <Heart size={20} className={wishlisted ? 'fill-blush-from text-blush-from' : 'text-gray-300'} />
+            </button>
+          </div>
 
           <div className="flex items-center gap-2 mb-3">
             <div className="flex text-gold">
@@ -106,8 +205,8 @@ export default function ProductDetail() {
             )}
           </div>
 
-          <p className={`text-sm mb-4 ${stock > 0 ? 'text-green-400' : 'text-blush-from'}`}>
-            {stock > 0 ? `In stock (${stock} available)` : 'Out of stock'}
+          <p className={`text-sm mb-4 font-medium ${stock > 5 ? 'text-green-400' : stock > 0 ? 'text-blush-from' : 'text-gray-500'}`}>
+            {stock > 5 ? `In stock (${stock} available)` : stock > 0 ? `Only ${stock} left — order soon!` : 'Out of stock'}
           </p>
 
           <p className="text-sm text-gray-300 leading-relaxed mb-6 whitespace-pre-line">{description}</p>
@@ -137,6 +236,75 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-6 border-t border-gold/10">
+        <h2 className="text-lg font-semibold text-white mb-4">Customer Reviews</h2>
+
+        {reviews.length === 0 ? (
+          <p className="text-sm text-gray-500 mb-6">No reviews yet. Be the first to review this product.</p>
+        ) : (
+          <div className="space-y-4 mb-8">
+            {reviews.map((r) => (
+              <div key={r._id} className="bg-luxe-panel border border-gold/10 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="flex text-gold">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={12} fill={i < r.rating ? '#D4AF37' : 'none'} strokeWidth={1} />
+                    ))}
+                  </div>
+                  <span className="text-sm text-white font-medium">{r.name}</span>
+                </div>
+                {r.comment && <p className="text-sm text-gray-400">{r.comment}</p>}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="bg-luxe-panel border border-gold/10 rounded-lg p-4 max-w-md">
+          <h3 className="text-sm font-medium text-white mb-3">Write a review</h3>
+          {reviewError && (
+            <div className="bg-blush-from/10 border border-blush-from/30 text-blush-from text-xs px-3 py-2 rounded mb-3">
+              {reviewError}
+            </div>
+          )}
+          <form onSubmit={handleReviewSubmit} className="space-y-3">
+            <ReviewStars rating={reviewRating} setRating={setReviewRating} />
+            <textarea
+              value={reviewComment}
+              onChange={(e) => setReviewComment(e.target.value)}
+              placeholder="Share your experience with this product (optional)"
+              rows={3}
+              className="w-full bg-black/40 border border-gold/30 text-white rounded-md px-3 py-2 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={submittingReview}
+              className="bg-gold hover:bg-gold-light text-black text-sm font-medium px-5 py-2 rounded-full disabled:opacity-60"
+            >
+              {submittingReview ? 'Submitting...' : 'Submit Review'}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {related.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 py-6 border-t border-gold/10">
+          <h2 className="text-lg font-semibold text-white mb-4">You may also like</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {related.map((p) => (
+              <Link
+                key={p._id}
+                to={`/product/${p._id}`}
+                className="bg-luxe-panel border border-gold/20 rounded-lg p-3 hover:border-gold/50 transition-colors"
+              >
+                <img src={p.images?.[0]} alt={p.name} className="h-32 object-contain mb-2 bg-white rounded w-full" />
+                <p className="text-xs text-gray-300 line-clamp-2 mb-1">{p.name}</p>
+                <p className="text-sm font-semibold text-white">₹{p.price.toLocaleString('en-IN')}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   )
 }
