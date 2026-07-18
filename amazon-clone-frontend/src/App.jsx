@@ -18,13 +18,17 @@ import TermsAndConditions from './pages/legal/TermsAndConditions'
 import RefundPolicy from './pages/legal/RefundPolicy'
 import ShippingPolicy from './pages/legal/ShippingPolicy'
 import ContactUs from './pages/legal/ContactUs'
+
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import { WishlistProvider } from './context/WishlistContext' // ✅ FIX
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
+
   if (loading) return null
   if (!user) return <Navigate to="/login" replace />
+
   return children
 }
 
@@ -32,11 +36,13 @@ function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
+
         <Route
           path="/checkout"
           element={
@@ -45,6 +51,7 @@ function Layout() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/orders"
           element={
@@ -53,7 +60,10 @@ function Layout() {
             </ProtectedRoute>
           }
         />
+
         <Route path="/product/:id" element={<ProductDetail />} />
+
+        {/* Legal Pages */}
         <Route path="/about" element={<AboutUs />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/press" element={<PressReleases />} />
@@ -65,6 +75,7 @@ function Layout() {
         <Route path="/shipping-policy" element={<ShippingPolicy />} />
         <Route path="/contact" element={<ContactUs />} />
       </Routes>
+
       <Footer />
     </div>
   )
@@ -74,7 +85,9 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <Layout />
+        <WishlistProvider> {/* ✅ MOST IMPORTANT FIX */}
+          <Layout />
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   )
