@@ -1,8 +1,9 @@
-import { Search, ShoppingCart, Menu, ChevronDown, X } from 'lucide-react'
+import { Search, ShoppingCart, Menu, ChevronDown, X, Heart } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { api } from '../api/client'
 
 const categories = [
   'Electronics', 'Fashion', 'Home & Kitchen', 'Books', 'Beauty',
@@ -15,11 +16,50 @@ export default function Header() {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [suggestions, setSuggestions] = useState([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const debounceRef = useRef(null)
+  const boxRef = useRef(null)
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (boxRef.current && !boxRef.current.contains(e.target)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function handleKeywordChange(value) {
+    setKeyword(value)
+    clearTimeout(debounceRef.current)
+    if (!value.trim()) {
+      setSuggestions([])
+      return
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const data = await api.get(`/products/suggestions?keyword=${encodeURIComponent(value)}`)
+        setSuggestions(data)
+        setShowSuggestions(true)
+      } catch {
+        setSuggestions([])
+      }
+    }, 250)
+  }
 
   function handleSearch(e) {
     e.preventDefault()
+    setShowSuggestions(false)
     navigate(`/?keyword=${encodeURIComponent(keyword)}`)
     setMobileOpen(false)
+  }
+
+  function goToSuggestion(p) {
+    setShowSuggestions(false)
+    setKeyword('')
+    navigate(`/product/${p._id}`)
   }
 
   return (
@@ -35,26 +75,52 @@ export default function Header() {
           </span>
         </Link>
 
-        <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl rounded-full overflow-hidden border border-gold/40">
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Search Teotia Shopprix"
-            className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm focus:outline-none placeholder:text-gray-500"
-          />
-          <button type="submit" className="bg-gold px-4 flex items-center justify-center hover:bg-gold-light">
-            <Search size={18} className="text-black" />
-          </button>
-        </form>
+        <div ref={boxRef} className="hidden md:block flex-1 max-w-2xl relative">
+          <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gold/40">
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => handleKeywordChange(e.target.value)}
+              onFocus={() => keyword && setShowSuggestions(true)}
+              placeholder="Search Teotia Shopprix"
+              className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm focus:outline-none placeholder:text-gray-500"
+            />
+            <button type="submit" className="bg-gold px-4 flex items-center justify-center hover:bg-gold-light">
+              <Search size={18} className="text-black" />
+            </button>
+          </form>
+
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-luxe-panel border border-gold/30 rounded-md shadow-goldGlow overflow-hidden z-50">
+              {suggestions.map((p) => (
+                <button
+                  key={p._id}
+                  onClick={() => goToSuggestion(p)}
+                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 text-left"
+                >
+                  <img src={p.images?.[0]} alt="" className="w-8 h-8 object-contain bg-white rounded" />
+                  <span className="text-sm text-gray-200 flex-1 truncate">{p.name}</span>
+                  <span className="text-xs text-gold">₹{p.price?.toLocaleString('en-IN')}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="ml-auto flex items-center gap-4">
+          {user && (
+            <Link to="/wishlist" className="hidden sm:block text-gray-200 hover:text-gold" aria-label="Wishlist">
+              <Heart size={22} />
+            </Link>
+          )}
+
           {user ? (
             <div className="hidden md:flex items-center gap-1 cursor-pointer group relative text-gray-200">
               <span className="text-sm">Hi, {user.name.split(' ')[0]}</span>
               <ChevronDown size={14} />
               <div className="absolute top-full right-0 hidden group-hover:block bg-luxe-panel border border-gold/30 shadow-goldGlow rounded-md py-2 w-40 mt-2">
                 <Link to="/orders" className="block px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Your Orders</Link>
+                <Link to="/wishlist" className="block px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Wishlist</Link>
                 <button onClick={logout} className="w-full text-left px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Sign out</button>
               </div>
             </div>
@@ -77,7 +143,7 @@ export default function Header() {
         <input
           type="text"
           value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onChange={(e) => handleKeywordChange(e.target.value)}
           placeholder="Search Teotia Shopprix"
           className="flex-1 px-4 py-2.5 bg-luxe-panel border border-gold/30 rounded-l-full text-white text-sm focus:outline-none placeholder:text-gray-500"
         />
@@ -104,6 +170,7 @@ export default function Header() {
             <>
               <p className="text-gray-200 text-sm">Hi, {user.name.split(' ')[0]}</p>
               <Link to="/orders" onClick={() => setMobileOpen(false)} className="block text-gray-300 text-sm py-1">Your Orders</Link>
+              <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="block text-gray-300 text-sm py-1">Wishlist</Link>
               <button onClick={() => { logout(); setMobileOpen(false) }} className="block text-gray-300 text-sm py-1">Sign out</button>
             </>
           ) : (
