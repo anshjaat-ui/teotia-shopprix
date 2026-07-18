@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import { api } from '../api/client'
-import { useAuth } from './AuthContext'
+import { createContext, useContext, useState, useEffect, useCallback } from "react"
+import { api } from "../api/client"
+import { useAuth } from "./AuthContext"
 
 const WishlistContext = createContext(null)
 
@@ -10,7 +10,6 @@ export function WishlistProvider({ children }) {
   const [productIds, setProductIds] = useState(new Set())
   const [products, setProducts] = useState([])
 
-  // ✅ Fetch wishlist
   const refresh = useCallback(async () => {
     if (!user) {
       setProductIds(new Set())
@@ -19,7 +18,7 @@ export function WishlistProvider({ children }) {
     }
 
     try {
-      const data = await api.get('/wishlist', true)
+      const data = await api.get("/wishlist", true)
 
       const list = data.products || []
       setProducts(list)
@@ -33,12 +32,12 @@ export function WishlistProvider({ children }) {
     refresh()
   }, [refresh])
 
-  // ✅ 🔥 FIXED TOGGLE (instant UI update + backend sync)
+  // ✅ 🔥 FINAL TOGGLE FIX
   async function toggle(productId) {
-    if (!user) throw new Error('NOT_LOGGED_IN')
+    if (!user) throw new Error("NOT_LOGGED_IN")
 
-    // 👉 Optimistic UI update (instant heart change)
-    setProductIds(prev => {
+    // ✅ instant UI update
+    setProductIds((prev) => {
       const updated = new Set(prev)
       if (updated.has(productId)) {
         updated.delete(productId)
@@ -51,41 +50,38 @@ export function WishlistProvider({ children }) {
     try {
       const data = await api.post(`/wishlist/${productId}`, {}, true)
 
-      const updatedProducts = data.wishlist?.products || []
-      setProducts(updatedProducts)
-      setProductIds(new Set(updatedProducts.map(p => p._id)))
+      console.log("WISHLIST API:", data)
 
-      return data.added
+      const updatedProducts =
+        data.wishlist?.products ||
+        data.products ||
+        []
+
+      setProducts(updatedProducts)
+      setProductIds(new Set(updatedProducts.map((p) => p._id)))
     } catch (err) {
-      console.log("Wishlist toggle error:", err)
+      console.log("Toggle error:", err)
 
       // ❌ revert if failed
       refresh()
     }
   }
 
-  // ✅ check function
   function isWishlisted(productId) {
     return productIds.has(productId)
   }
 
   return (
     <WishlistContext.Provider
-      value={{
-        products,
-        isWishlisted,
-        toggle,
-        refresh
-      }}
+      value={{ products, isWishlisted, toggle, refresh }}
     >
       {children}
     </WishlistContext.Provider>
   )
 }
 
-// ✅ Hook
 export function useWishlist() {
   const ctx = useContext(WishlistContext)
-  if (!ctx) throw new Error('useWishlist must be used within WishlistProvider')
+  if (!ctx) throw new Error("useWishlist must be used within WishlistProvider")
   return ctx
 }
