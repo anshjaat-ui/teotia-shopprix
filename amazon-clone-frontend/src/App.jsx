@@ -22,6 +22,7 @@ import ContactUs from './pages/legal/ContactUs'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { WishlistProvider } from './context/WishlistContext'
+import { ToastProvider } from './context/ToastContext'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -39,30 +40,9 @@ function Layout() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
-        <Route
-          path="/checkout"
-          element={
-            <ProtectedRoute>
-              <Checkout />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoute>
-              <Orders />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/wishlist"
-          element={
-            <ProtectedRoute>
-              <Wishlist />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+        <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/careers" element={<Careers />} />
@@ -82,12 +62,14 @@ function Layout() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <Layout />
-        </WishlistProvider>
-      </CartProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <CartProvider>
+          <WishlistProvider>
+            <Layout />
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
+    </ToastProvider>
   )
 }
