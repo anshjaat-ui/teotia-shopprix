@@ -5,11 +5,6 @@ import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { api } from '../api/client'
 
-const categories = [
-  'Electronics', 'Fashion', 'Home & Kitchen', 'Books', 'Beauty',
-  'Sports', 'Toys', 'Grocery', 'Mobiles'
-]
-
 export default function Header() {
   const { user, logout } = useAuth()
   const { itemCount } = useCart()
@@ -18,8 +13,13 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [categories, setCategories] = useState([])
   const debounceRef = useRef(null)
   const boxRef = useRef(null)
+
+  useEffect(() => {
+    api.get('/categories').then(setCategories).catch(() => setCategories([]))
+  }, [])
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -155,11 +155,11 @@ export default function Header() {
       <div className="hidden md:flex items-center gap-5 px-3 py-2 border-t border-gold/10 overflow-x-auto">
         {categories.map(c => (
           <span
-            key={c}
-            onClick={() => navigate(`/?category=${encodeURIComponent(c)}`)}
-            className="cursor-pointer text-sm text-gray-300 hover:text-gold whitespace-nowrap shrink-0"
+            key={c._id}
+            onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
+            className="cursor-pointer text-sm text-gray-300 hover:text-gold hover:scale-105 whitespace-nowrap shrink-0 transition-transform flex items-center gap-1"
           >
-            {c}
+            <span>{c.emoji}</span> {c.name}
           </span>
         ))}
       </div>
@@ -179,11 +179,11 @@ export default function Header() {
           <div className="border-t border-gold/10 pt-2">
             {categories.map(c => (
               <span
-                key={c}
-                onClick={() => { navigate(`/?category=${encodeURIComponent(c)}`); setMobileOpen(false) }}
-                className="block cursor-pointer text-sm text-gray-300 hover:text-gold py-1.5"
+                key={c._id}
+                onClick={() => { navigate(`/?category=${encodeURIComponent(c.name)}`); setMobileOpen(false) }}
+                className="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gold py-1.5"
               >
-                {c}
+                <span>{c.emoji}</span> {c.name}
               </span>
             ))}
           </div>
