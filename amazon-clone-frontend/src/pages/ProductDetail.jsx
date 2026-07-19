@@ -1,20 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { Star, ShoppingCart, Truck, ShieldCheck, RotateCcw, Heart } from 'lucide-react'
 import { api } from '../api/client'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { useWishlist } from '../context/WishlistContext'
+import { useToast } from '../context/ToastContext'
 
 function ZoomImage({ src, alt }) {
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
   const [zooming, setZooming] = useState(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
   function handleMouseMove(e) {
     const rect = e.currentTarget.getBoundingClientRect()
     const x = ((e.clientX - rect.left) / rect.width) * 100
     const y = ((e.clientY - rect.top) / rect.height) * 100
     setZoomPos({ x, y })
+    setTilt({ x: (y / 100 - 0.5) * -6, y: (x / 100 - 0.5) * 6 })
   }
 
   return (
@@ -22,7 +25,8 @@ function ZoomImage({ src, alt }) {
       className="bg-white rounded-lg overflow-hidden mb-3 aspect-square flex items-center justify-center relative cursor-zoom-in"
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setZooming(true)}
-      onMouseLeave={() => setZooming(false)}
+      onMouseLeave={() => { setZooming(false); setTilt({ x: 0, y: 0 }) }}
+      style={{ perspective: '800px' }}
     >
       <img
         src={src}
@@ -30,10 +34,54 @@ function ZoomImage({ src, alt }) {
         className="max-h-full max-w-full object-contain transition-transform duration-150"
         style={
           zooming
-            ? { transform: 'scale(2)', transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` }
+            ? {
+                transform: `scale(1.8) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+              }
             : {}
         }
       />
+    </div>
+  )
+}
+
+function SpinViewer({ images }) {
+  const [index, setIndex] = useState(0)
+  const dragging = useRef(false)
+  const lastX = useRef(0)
+
+  function handleDown(e) {
+    dragging.current = true
+    lastX.current = e.clientX ?? e.touches?.[0]?.clientX
+  }
+  function handleMove(e) {
+    if (!dragging.current) return
+    const x = e.clientX ?? e.touches?.[0]?.clientX
+    const delta = x - lastX.current
+    if (Math.abs(delta) > 25) {
+      setIndex((i) => (delta > 0 ? (i - 1 + images.length) % images.length : (i + 1) % images.length))
+      lastX.current = x
+    }
+  }
+  function handleUp() {
+    dragging.current = false
+  }
+
+  return (
+    <div
+      className="bg-white rounded-lg overflow-hidden mb-3 aspect-square flex items-center justify-center relative cursor-grab active:cursor-grabbing select-none"
+      onMouseDown={handleDown}
+      onMouseMove={handleMove}
+      onMouseUp={handleUp}
+      onMouseLeave={handleUp}
+      onTouchStart={handleDown}
+      onTouchMove={handleMove}
+      onTouchEnd={handleUp}
+    >
+      <img src={images[index]} alt="" className="max-h-full max-w-full object-contain pointer-events-none" draggable={false} />
+      <span className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 text-gold text-[10px] px-3 py-1 rounded-full">
+        Drag to rotate 360°
+      </span>
     </div>
   )
 }
@@ -56,12 +104,14 @@ export default function ProductDetail() {
   const { addToCart } = useCart()
   const { user } = useAuth()
   const { isWishlisted, toggle } = useWishlist()
+  const { showToast } = useToast()
 
   const [product, setProduct] = useState(null)
   const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [activeImg, setActiveImg] = useState(0)
+  const [viewMode, setViewMode] = useState('zoom')
   const [adding, setAdding] = useState(false)
   const [added, setAdded] = useState(false)
 
@@ -98,7 +148,10 @@ export default function ProductDetail() {
     try {
       await addToCart(product._id, 1)
       setAdded(true)
+      showToast('Added to cart')
       setTimeout(() => setAdded(false), 1500)
+    } catch (err) {
+      showToast(err.message || 'Could not add to cart', 'error')
     } finally {
       setAdding(false)
     }
@@ -109,7 +162,12 @@ export default function ProductDetail() {
       navigate('/login', { state: { from: `/product/${id}` } })
       return
     }
-    await toggle(product._id)
+    try {
+      const added = await toggle(product._id)
+      showToast(added ? 'Added to wishlist' : 'Removed from wishlist')
+    } catch (err) {
+      showToast(err.message || 'Wishlist update failed', 'error')
+    }
   }
 
   async function handleReviewSubmit(e) {
@@ -128,6 +186,7 @@ export default function ProductDetail() {
       await api.post(`/products/${id}/reviews`, { rating: reviewRating, comment: reviewComment }, true)
       setReviewRating(0)
       setReviewComment('')
+      showToast('Review submitted, thank you!')
       loadProduct()
     } catch (err) {
       setReviewError(err.message)
@@ -157,7 +216,19 @@ export default function ProductDetail() {
     <main className="bg-luxe-bg min-h-[70vh] font-sans">
       <div className="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <ZoomImage src={images[activeImg]} alt={name} />
+          {viewMode === 'spin' && images.length >= 3 ? (
+            <SpinViewer images={images} />
+          ) : (
+            <ZoomImage src={images[activeImg]} alt={name} />
+          )}
+          {images.length >= 3 && (
+            <button
+              onClick={() => setViewMode(viewMode === 'spin' ? 'zoom' : 'spin')}
+              className="mb-3 text-xs text-gold border border-gold/30 rounded-full px-3 py-1 hover:bg-gold/10 transition-colors"
+            >
+              {viewMode === 'spin' ? '🔍 Switch to Zoom View' : '🔄 Switch to 360° View'}
+            </button>
+          )}
           {images.length > 1 && (
             <div className="flex gap-2">
               {images.map((img, i) => (
