@@ -109,8 +109,12 @@ export default function Header() {
 
         <div className="ml-auto flex items-center gap-4">
           {user && (
-            <Link to="/wishlist" className="hidden sm:block text-gray-200 hover:text-gold" aria-label="Wishlist">
-              <Heart size={22} />
+            <Link
+              to="/wishlist"
+              className="hidden sm:flex w-9 h-9 rounded-full bg-black items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
+              aria-label="Wishlist"
+            >
+              <Heart size={18} />
             </Link>
           )}
 
@@ -152,15 +156,20 @@ export default function Header() {
         </button>
       </form>
 
-      <div className="hidden md:flex items-center gap-5 px-3 py-2 border-t border-gold/10 overflow-x-auto">
+      <div className="hidden md:flex items-center gap-6 px-3 py-3 border-t border-gold/10 overflow-x-auto">
         {categories.map(c => (
-          <span
+          <div
             key={c._id}
             onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
-            className="cursor-pointer text-sm text-gray-300 hover:text-gold hover:scale-105 whitespace-nowrap shrink-0 transition-transform flex items-center gap-1"
+            className="flex flex-col items-center gap-1 cursor-pointer shrink-0 group"
           >
-            <span>{c.emoji}</span> {c.name}
-          </span>
+            <span className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-lg group-hover:bg-gold transition-colors">
+              {c.emoji}
+            </span>
+            <span className="text-[11px] text-gray-300 group-hover:text-gold whitespace-nowrap transition-colors">
+              {c.name}
+            </span>
+          </div>
         ))}
       </div>
 
@@ -176,15 +185,18 @@ export default function Header() {
           ) : (
             <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-gold text-sm py-1">Sign in</Link>
           )}
-          <div className="border-t border-gold/10 pt-2">
+          <div className="border-t border-gold/10 pt-3 grid grid-cols-4 gap-3">
             {categories.map(c => (
-              <span
+              <div
                 key={c._id}
                 onClick={() => { navigate(`/?category=${encodeURIComponent(c.name)}`); setMobileOpen(false) }}
-                className="flex items-center gap-2 cursor-pointer text-sm text-gray-300 hover:text-gold py-1.5"
+                className="flex flex-col items-center gap-1 cursor-pointer"
               >
-                <span>{c.emoji}</span> {c.name}
-              </span>
+                <span className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-lg">
+                  {c.emoji}
+                </span>
+                <span className="text-[10px] text-gray-300 text-center">{c.name}</span>
+              </div>
             ))}
           </div>
         </div>
