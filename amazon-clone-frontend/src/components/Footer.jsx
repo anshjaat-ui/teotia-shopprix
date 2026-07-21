@@ -6,13 +6,9 @@ const SOCIAL = {
   instagram: 'https://instagram.com/teotiashopprix',
 }
 
-// ✅ Add email here (single source)
-const EMAIL = "Anshwalyan@gmail.com"
-
 export default function Footer() {
   return (
     <footer className="bg-luxe-panel text-white mt-8 font-sans border-t border-gold/20">
-      
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         className="w-full bg-luxe-bg hover:bg-black py-3 text-sm text-gold"
@@ -21,8 +17,6 @@ export default function Footer() {
       </button>
 
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6 py-10 text-sm">
-        
-        {/* Get to Know Us */}
         <div>
           <h4 className="font-bold text-gold mb-3">Get to Know Us</h4>
           <ul className="space-y-2 text-gray-400">
@@ -31,8 +25,6 @@ export default function Footer() {
             <li><Link to="/press" className="hover:text-gold">Press Releases</Link></li>
           </ul>
         </div>
-
-        {/* Connect with Us */}
         <div>
           <h4 className="font-bold text-gold mb-3">Connect with Us</h4>
           <ul className="space-y-2 text-gray-400">
@@ -41,8 +33,6 @@ export default function Footer() {
             <li><a href={SOCIAL.instagram} target="_blank" rel="noreferrer" className="hover:text-gold">Instagram</a></li>
           </ul>
         </div>
-
-        {/* Make Money */}
         <div>
           <h4 className="font-bold text-gold mb-3">Make Money with Us</h4>
           <ul className="space-y-2 text-gray-400">
@@ -50,8 +40,6 @@ export default function Footer() {
             <li><Link to="/affiliate" className="hover:text-gold">Become an Affiliate</Link></li>
           </ul>
         </div>
-
-        {/* Help Section + Email */}
         <div>
           <h4 className="font-bold text-gold mb-3">Let Us Help You</h4>
           <ul className="space-y-2 text-gray-400">
@@ -60,17 +48,6 @@ export default function Footer() {
             <li><Link to="/refund-policy" className="hover:text-gold">Returns & Refunds</Link></li>
             <li><Link to="/terms" className="hover:text-gold">Terms & Conditions</Link></li>
             <li><Link to="/privacy-policy" className="hover:text-gold">Privacy Policy</Link></li>
-
-            {/* ✅ EMAIL ADDED HERE */}
-            <li className="pt-2 text-gray-300">
-              📧 Email: 
-              <a 
-                href={`mailto:${EMAIL}`} 
-                className="hover:text-gold ml-1"
-              >
-                {EMAIL}
-              </a>
-            </li>
           </ul>
         </div>
       </div>
