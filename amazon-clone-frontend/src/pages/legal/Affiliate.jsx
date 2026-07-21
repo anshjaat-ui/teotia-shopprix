@@ -15,11 +15,11 @@ export default function Affiliate() {
 
           {/* ✅ FIX START */}
           <a
-            href="mailto:affiliates@teotiashopprix.com"
+            href="mailto:Anshwalayn@gmail.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
             <Mail size={16} />
-            affiliates@teotiashopprix.com
+            Anshwalyan@gmail.com
           </a>
           {/* ✅ FIX END */}
 
