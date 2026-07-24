@@ -1,1 +1,9 @@
-<source src="/hero.mp4" type="video/mp4" />
+<video
+  autoPlay
+  loop
+  muted
+  playsInline
+  className="w-full h-[320px] md:h-[440px] object-cover"
+>
+  <source src="/hero.mp4" type="video/mp4" />
+</video>
