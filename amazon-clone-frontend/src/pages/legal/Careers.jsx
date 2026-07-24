@@ -19,11 +19,11 @@ export default function Careers() {
 
           {/* ✅ FIX START */}
           <a
-            href="mailto:careers@teotiashopprix.com"
+            href="mailto:krishanteotia78@gmail.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
             <Mail size={16} />
-            careers@teotiashopprix.com
+            krishanteotia78@gmail.com
           </a>
           {/* ✅ FIX END */}
 
