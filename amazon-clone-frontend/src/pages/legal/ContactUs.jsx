@@ -12,7 +12,7 @@ export default function ContactUs() {
         <div className="space-y-4 text-sm text-gray-300">
           <div className="flex items-center gap-3">
             <Mail size={18} className="text-gold" />
-            <span>support@teotiashopprix.com</span>
+            <span>krishanteotia78@gmail.com</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone size={18} className="text-gold" />
