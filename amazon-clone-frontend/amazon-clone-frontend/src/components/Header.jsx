@@ -1,12 +1,8 @@
-Aapke is **`Header.jsx`** component mein sub-categories dropdown, colorful categories, aur schemes/navigation ko integrate karne ke liye poora updated code niche diya gaya hai.
+Yeh error isliye aa raha hai kyunki aapne **`Header.jsx`** file ke andar galti se mera conversational text (Hindi explanation) copy-paste kar diya hai, jiska pehla word `Aapke` hai. Us file mein sirf JavaScript/React ka code hona chahiye, koi text ya explanation nahi.
 
-Is code mein yeh changes kiye gaye hain:
+Is error ko theek karne ke liye apne `src/components/Header.jsx` file ki **sabse pehli line** par jaakar wo Hindi text hata dein, aur sirf code rakhein.
 
-1. **Sub-Categories Dropdown:** Categories par hover karne par ab sub-categories ka dropdown menu dikhega (jaise Stationery par click ya hover karne par books, pens, notebooks, etc. dikhengi).
-2. **Colorful Categories:** Jo black/grayscale icons the, unhe hata kar vibrant aur colorful gradients de diye hain taaki wo white na lagein.
-3. **Schemes Button:** Header ke andar hi Schemes ka link prominent tarike se add kar diya hai taaki customer side par bhi easily access ho sake.
-
-### Updated `Header.jsx` Code:
+Aapke liye clean aur error-free **`Header.jsx`** ka exact code niche diya gaya hai. Ise poora copy karke apni file mein paste kar dein:
 
 ```jsx
 import { Search, ShoppingCart, Menu, ChevronDown, X, Heart, Sparkles } from 'lucide-react'
@@ -25,16 +21,14 @@ export default function Header() {
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [categories, setCategories] = useState([])
-  const [activeCategory, setActiveCategory] = useState(null) // Subcategories dropdown ke liye
+  const [activeCategory, setActiveCategory] = useState(null)
   const debounceRef = useRef(null)
   const boxRef = useRef(null)
 
   useEffect(() => {
-    // Mocking or fetching categories with subcategories
     api.get('/categories').then((res) => {
       setCategories(res)
     }).catch(() => {
-      // Fallback categories with rich subcategories & vibrant colors for UI demo
       setCategories([
         { 
           _id: '1', name: 'Stationery', emoji: '📚', 
@@ -115,7 +109,6 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* Search Bar */}
         <div ref={boxRef} className="hidden md:block flex-1 max-w-2xl relative mx-4">
           <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gold/40 shadow-inner">
             <input
@@ -123,7 +116,7 @@ export default function Header() {
               value={keyword}
               onChange={(e) => handleKeywordChange(e.target.value)}
               onFocus={() => keyword && setShowSuggestions(true)}
-              placeholder="Search Teotia Shopprix (e.g. Stationery, Wellness Kits)..."
+              placeholder="Search Teotia Shopprix..."
               className="flex-1 px-5 py-2.5 bg-luxe-panel text-white text-sm focus:outline-none placeholder:text-gray-400"
             />
             <button type="submit" className="bg-gold px-5 flex items-center justify-center hover:bg-gold-light transition-colors">
@@ -148,9 +141,7 @@ export default function Header() {
           )}
         </div>
 
-        {/* Right Actions */}
         <div className="ml-auto flex items-center gap-4">
-          {/* Schemes Button - Customer Side Visible */}
           <Link to="/schemes" className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-black bg-gold rounded-full px-4 py-2 hover:bg-gold-light transition-all shadow-sm whitespace-nowrap">
             <Sparkles size={14} /> Schemes & Offers
           </Link>
@@ -190,7 +181,6 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Search Bar */}
       <form onSubmit={handleSearch} className="md:hidden flex px-3 pb-3">
         <input
           type="text"
@@ -204,7 +194,6 @@ export default function Header() {
         </button>
       </form>
 
-      {/* Colorful Categories & Sub-Categories Navbar */}
       <div className="hidden md:flex items-center justify-center gap-4 px-4 py-2.5 border-t border-gold/10 overflow-x-auto bg-black/40">
         {categories.map((c) => (
           <div 
@@ -213,7 +202,6 @@ export default function Header() {
             onMouseEnter={() => setActiveCategory(c._id)}
             onMouseLeave={() => setActiveCategory(null)}
           >
-            {/* Colorful Category Card Badge */}
             <div
               onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
               className={`flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gradient-to-r ${c.gradient || 'from-blue-600 to-indigo-600'} text-white shadow-md hover:scale-105 transition-all duration-300 whitespace-nowrap`}
@@ -223,9 +211,8 @@ export default function Header() {
               {c.subcategories && c.subcategories.length > 0 && <ChevronDown size={14} className="opacity-80" />}
             </div>
 
-            {/* Sub-Categories Dropdown */}
             {c.subcategories && c.subcategories.length > 0 && activeCategory === c._id && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-md animate-fadeIn">
+              <div className="absolute top-full left-0 mt-1 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-md">
                 <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold border-b border-gold/20 mb-1">
                   {c.name} Options
                 </div>
@@ -248,7 +235,6 @@ export default function Header() {
         ))}
       </div>
 
-      {/* Mobile Drawer Menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gold/20 bg-luxe-panel px-4 py-4 space-y-4">
           <Link to="/schemes" onClick={() => setMobileOpen(false)} className="flex items-center justify-center gap-2 text-xs font-bold text-black bg-gold rounded-lg py-2.5 shadow">
