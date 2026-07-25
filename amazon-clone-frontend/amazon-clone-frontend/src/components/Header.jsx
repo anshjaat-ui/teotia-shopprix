@@ -9,11 +9,14 @@ export default function Header() {
   const { user, logout } = useAuth()
   const { itemCount } = useCart()
   const navigate = useNavigate()
+
   const [keyword, setKeyword] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [categories, setCategories] = useState([])
+  const [hovered, setHovered] = useState(null)
+
   const debounceRef = useRef(null)
   const boxRef = useRef(null)
 
@@ -34,10 +37,12 @@ export default function Header() {
   function handleKeywordChange(value) {
     setKeyword(value)
     clearTimeout(debounceRef.current)
+
     if (!value.trim()) {
       setSuggestions([])
       return
     }
+
     debounceRef.current = setTimeout(async () => {
       try {
         const data = await api.get(`/products/suggestions?keyword=${encodeURIComponent(value)}`)
@@ -64,17 +69,20 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 font-sans bg-luxe-bg border-b border-gold/30">
+
+      {/* TOP BAR */}
       <div className="flex items-center gap-3 px-3 py-3">
-        <button className="md:hidden text-gold" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
+        <button className="md:hidden text-gold" onClick={() => setMobileOpen(!mobileOpen)}>
           {mobileOpen ? <X size={26} /> : <Menu size={26} />}
         </button>
 
         <Link to="/" className="flex items-center shrink-0">
-          <span className="text-lg sm:text-2xl font-bold tracking-wide text-gold whitespace-nowrap drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
+          <span className="text-lg sm:text-2xl font-bold text-gold">
             Teotia Shopprix
           </span>
         </Link>
 
+        {/* SEARCH */}
         <div ref={boxRef} className="hidden md:block flex-1 max-w-2xl relative">
           <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gold/40">
             <input
@@ -82,64 +90,47 @@ export default function Header() {
               value={keyword}
               onChange={(e) => handleKeywordChange(e.target.value)}
               onFocus={() => keyword && setShowSuggestions(true)}
-              placeholder="Search Teotia Shopprix"
-              className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm focus:outline-none placeholder:text-gray-500"
+              placeholder="Search..."
+              className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm outline-none"
             />
-            <button type="submit" className="bg-gold px-4 flex items-center justify-center hover:bg-gold-light">
+            <button type="submit" className="bg-gold px-4">
               <Search size={18} className="text-black" />
             </button>
           </form>
 
           {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-luxe-panel border border-gold/30 rounded-md shadow-goldGlow overflow-hidden z-50">
+            <div className="absolute top-full left-0 right-0 bg-luxe-panel border border-gold/30 rounded shadow-lg z-50">
               {suggestions.map((p) => (
                 <button
                   key={p._id}
                   onClick={() => goToSuggestion(p)}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 text-left"
+                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5"
                 >
-                  <img src={p.images?.[0]} alt="" className="w-8 h-8 object-contain bg-white rounded" />
-                  <span className="text-sm text-gray-200 flex-1 truncate">{p.name}</span>
-                  <span className="text-xs text-gold">₹{p.price?.toLocaleString('en-IN')}</span>
+                  <img src={p.images?.[0]} className="w-8 h-8 object-contain bg-white rounded" />
+                  <span className="text-sm text-gray-200 flex-1">{p.name}</span>
+                  <span className="text-xs text-gold">₹{p.price}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
 
+        {/* RIGHT */}
         <div className="ml-auto flex items-center gap-4">
-          <Link to="/schemes" className="hidden sm:block text-xs text-gold border border-gold/40 rounded-full px-3 py-1.5 hover:bg-gold/10 transition-colors whitespace-nowrap">
+          <Link to="/schemes" className="text-xs text-gold border px-3 py-1 rounded-full">
             🎁 Schemes
           </Link>
 
           {user && (
-            <Link
-              to="/wishlist"
-              className="hidden sm:flex w-9 h-9 rounded-full bg-black items-center justify-center text-white hover:bg-gold hover:text-black transition-colors"
-              aria-label="Wishlist"
-            >
+            <Link to="/wishlist" className="hidden sm:flex w-9 h-9 bg-black items-center justify-center rounded-full">
               <Heart size={18} />
             </Link>
           )}
 
-          {user ? (
-            <div className="hidden md:flex items-center gap-1 cursor-pointer group relative text-gray-200">
-              <span className="text-sm">Hi, {user.name.split(' ')[0]}</span>
-              <ChevronDown size={14} />
-              <div className="absolute top-full right-0 hidden group-hover:block bg-luxe-panel border border-gold/30 shadow-goldGlow rounded-md py-2 w-40 mt-2">
-                <Link to="/orders" className="block px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Your Orders</Link>
-                <Link to="/wishlist" className="block px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Wishlist</Link>
-                <button onClick={logout} className="w-full text-left px-3 py-1.5 text-sm text-gray-200 hover:text-gold">Sign out</button>
-              </div>
-            </div>
-          ) : (
-            <Link to="/login" className="hidden md:block text-sm text-gray-200 hover:text-gold">Sign in</Link>
-          )}
-
-          <Link to="/cart" className="relative text-gray-200 hover:text-gold">
+          <Link to="/cart" className="relative">
             <ShoppingCart size={26} />
             {itemCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-blush-gradient text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
                 {itemCount}
               </span>
             )}
@@ -147,64 +138,63 @@ export default function Header() {
         </div>
       </div>
 
-      <form onSubmit={handleSearch} className="md:hidden flex px-3 pb-3">
-        <input
-          type="text"
-          value={keyword}
-          onChange={(e) => handleKeywordChange(e.target.value)}
-          placeholder="Search Teotia Shopprix"
-          className="flex-1 px-4 py-2.5 bg-luxe-panel border border-gold/30 rounded-l-full text-white text-sm focus:outline-none placeholder:text-gray-500"
-        />
-        <button type="submit" className="bg-gold px-4 rounded-r-full flex items-center justify-center">
-          <Search size={18} className="text-black" />
-        </button>
-      </form>
-
-      <div className="hidden md:flex items-center gap-6 px-3 py-3 border-t border-gold/10 overflow-x-auto">
-        {categories.map(c => (
+      {/* 🔥 CATEGORY ICON ROW WITH SUBCATEGORY */}
+      <div className="hidden md:flex gap-6 px-3 py-3 border-t border-gold/10 overflow-x-auto">
+        {categories.map((c, index) => (
           <div
             key={c._id}
-            onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
-            className="flex flex-col items-center gap-1 cursor-pointer shrink-0 group"
+            className="relative flex flex-col items-center cursor-pointer group"
+            onMouseEnter={() => setHovered(index)}
+            onMouseLeave={() => setHovered(null)}
+            onClick={() => navigate(`/category/${c.name}`)}
           >
-            <span className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-lg group-hover:bg-gold transition-colors">
-              <span style={{ filter: 'grayscale(1) brightness(0) invert(1)' }}>{c.emoji}</span>
-            </span>
-            <span className="text-[11px] text-gray-300 group-hover:text-gold whitespace-nowrap transition-colors">
-              {c.name}
-            </span>
+            {/* ICON */}
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-xl">
+              {c.emoji}
+            </div>
+
+            {/* NAME */}
+            <span className="text-xs text-gray-300 mt-1">{c.name}</span>
+
+            {/* 🔥 SUBCATEGORY DROPDOWN */}
+            {hovered === index && c.subCategories?.length > 0 && (
+              <div className="absolute top-16 bg-black border border-gray-700 rounded shadow-lg p-2 z-50 min-w-[150px]">
+                {c.subCategories.map((sub, i) => (
+                  <div
+                    key={i}
+                    className="text-sm px-3 py-1 hover:bg-gray-800"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/category/${c.name}?sub=${sub}`)
+                    }}
+                  >
+                    {sub}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
+      {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gold/20 bg-luxe-panel px-4 py-3 space-y-3">
-          {user ? (
-            <>
-              <p className="text-gray-200 text-sm">Hi, {user.name.split(' ')[0]}</p>
-              <Link to="/orders" onClick={() => setMobileOpen(false)} className="block text-gray-300 text-sm py-1">Your Orders</Link>
-              <Link to="/wishlist" onClick={() => setMobileOpen(false)} className="block text-gray-300 text-sm py-1">Wishlist</Link>
-              <button onClick={() => { logout(); setMobileOpen(false) }} className="block text-gray-300 text-sm py-1">Sign out</button>
-            </>
-          ) : (
-            <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-gold text-sm py-1">Sign in</Link>
-          )}
-          <div className="border-t border-gold/10 pt-3 grid grid-cols-4 gap-3">
-            {categories.map(c => (
-              <div
-                key={c._id}
-                onClick={() => { navigate(`/?category=${encodeURIComponent(c.name)}`); setMobileOpen(false) }}
-                className="flex flex-col items-center gap-1 cursor-pointer"
-              >
-                <span className="w-11 h-11 rounded-full bg-black flex items-center justify-center text-lg">
-                  <span style={{ filter: 'grayscale(1) brightness(0) invert(1)' }}>{c.emoji}</span>
-                </span>
-                <span className="text-[10px] text-gray-300 text-center">{c.name}</span>
-              </div>
-            ))}
-          </div>
+        <div className="md:hidden bg-luxe-panel p-3">
+          {categories.map(c => (
+            <div
+              key={c._id}
+              className="py-2 border-b border-gray-700"
+              onClick={() => {
+                navigate(`/category/${c.name}`)
+                setMobileOpen(false)
+              }}
+            >
+              {c.name}
+            </div>
+          ))}
         </div>
       )}
+
     </header>
   )
 }
