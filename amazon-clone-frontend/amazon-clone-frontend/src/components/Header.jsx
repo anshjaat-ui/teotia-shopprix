@@ -1,200 +1,75 @@
-import { Search, ShoppingCart, Menu, ChevronDown, X, Heart } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useState, useEffect, useRef } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { useCart } from '../context/CartContext'
-import { api } from '../api/client'
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import api from "../api/client"
 
 export default function Header() {
-  const { user, logout } = useAuth()
-  const { itemCount } = useCart()
+  const [categories, setCategories] = useState([])
+  const [open, setOpen] = useState(null)
   const navigate = useNavigate()
 
-  const [keyword, setKeyword] = useState('')
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [suggestions, setSuggestions] = useState([])
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const [categories, setCategories] = useState([])
-  const [hovered, setHovered] = useState(null)
-
-  const debounceRef = useRef(null)
-  const boxRef = useRef(null)
-
   useEffect(() => {
-    api.get('/categories').then(setCategories).catch(() => setCategories([]))
-  }, [])
+    async function load() {
+      const res = await api.get("/categories")
+      const data = res.data
 
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (boxRef.current && !boxRef.current.contains(e.target)) {
-        setShowSuggestions(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+      // 🔥 STEP 1: main categories
+      const main = data.filter(c => c.parent === null)
 
-  function handleKeywordChange(value) {
-    setKeyword(value)
-    clearTimeout(debounceRef.current)
+      // 🔥 STEP 2: attach subcategories
+      const structured = main.map(cat => ({
+        ...cat,
+        subCategories: data.filter(sub => sub.parent === cat._id)
+      }))
 
-    if (!value.trim()) {
-      setSuggestions([])
-      return
+      setCategories(structured)
     }
 
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const data = await api.get(`/products/suggestions?keyword=${encodeURIComponent(value)}`)
-        setSuggestions(data)
-        setShowSuggestions(true)
-      } catch {
-        setSuggestions([])
-      }
-    }, 250)
-  }
-
-  function handleSearch(e) {
-    e.preventDefault()
-    setShowSuggestions(false)
-    navigate(`/?keyword=${encodeURIComponent(keyword)}`)
-    setMobileOpen(false)
-  }
-
-  function goToSuggestion(p) {
-    setShowSuggestions(false)
-    setKeyword('')
-    navigate(`/product/${p._id}`)
-  }
+    load()
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 font-sans bg-luxe-bg border-b border-gold/30">
+    <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-white px-4 py-3">
+      <div className="flex gap-6 overflow-x-auto">
 
-      {/* TOP BAR */}
-      <div className="flex items-center gap-3 px-3 py-3">
-        <button className="md:hidden text-gold" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X size={26} /> : <Menu size={26} />}
-        </button>
-
-        <Link to="/" className="flex items-center shrink-0">
-          <span className="text-lg sm:text-2xl font-bold text-gold">
-            Teotia Shopprix
-          </span>
-        </Link>
-
-        {/* SEARCH */}
-        <div ref={boxRef} className="hidden md:block flex-1 max-w-2xl relative">
-          <form onSubmit={handleSearch} className="flex rounded-full overflow-hidden border border-gold/40">
-            <input
-              type="text"
-              value={keyword}
-              onChange={(e) => handleKeywordChange(e.target.value)}
-              onFocus={() => keyword && setShowSuggestions(true)}
-              placeholder="Search..."
-              className="flex-1 px-4 py-2 bg-luxe-panel text-white text-sm outline-none"
-            />
-            <button type="submit" className="bg-gold px-4">
-              <Search size={18} className="text-black" />
-            </button>
-          </form>
-
-          {showSuggestions && suggestions.length > 0 && (
-            <div className="absolute top-full left-0 right-0 bg-luxe-panel border border-gold/30 rounded shadow-lg z-50">
-              {suggestions.map((p) => (
-                <button
-                  key={p._id}
-                  onClick={() => goToSuggestion(p)}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5"
-                >
-                  <img src={p.images?.[0]} className="w-8 h-8 object-contain bg-white rounded" />
-                  <span className="text-sm text-gray-200 flex-1">{p.name}</span>
-                  <span className="text-xs text-gold">₹{p.price}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* RIGHT */}
-        <div className="ml-auto flex items-center gap-4">
-          <Link to="/schemes" className="text-xs text-gold border px-3 py-1 rounded-full">
-            🎁 Schemes
-          </Link>
-
-          {user && (
-            <Link to="/wishlist" className="hidden sm:flex w-9 h-9 bg-black items-center justify-center rounded-full">
-              <Heart size={18} />
-            </Link>
-          )}
-
-          <Link to="/cart" className="relative">
-            <ShoppingCart size={26} />
-            {itemCount > 0 && (
-              <span className="absolute -top-1 -right-2 bg-red-500 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
-                {itemCount}
-              </span>
-            )}
-          </Link>
-        </div>
-      </div>
-
-      {/* 🔥 CATEGORY ICON ROW WITH SUBCATEGORY */}
-      <div className="hidden md:flex gap-6 px-3 py-3 border-t border-gold/10 overflow-x-auto">
-        {categories.map((c, index) => (
+        {categories.map(c => (
           <div
             key={c._id}
-            className="relative flex flex-col items-center cursor-pointer group"
-            onMouseEnter={() => setHovered(index)}
-            onMouseLeave={() => setHovered(null)}
-            onClick={() => navigate(`/category/${c.name}`)}
+            className="relative"
+            onMouseEnter={() => setOpen(c._id)}
+            onMouseLeave={() => setOpen(null)}
           >
-            {/* ICON */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-xl">
-              {c.emoji}
+            {/* 🔥 ICON SECTION */}
+            <div
+              onClick={() => navigate(`/category/${c.name}`)}
+              className="flex flex-col items-center cursor-pointer"
+            >
+              <span className="text-2xl">{c.emoji}</span>
+              <span className="text-xs">{c.name}</span>
             </div>
 
-            {/* NAME */}
-            <span className="text-xs text-gray-300 mt-1">{c.name}</span>
+            {/* 🔥 DROPDOWN */}
+            {open === c._id && c.subCategories.length > 0 && (
+              <div className="absolute top-12 left-0 bg-white text-black shadow-lg rounded p-3 min-w-[180px] z-50">
 
-            {/* 🔥 SUBCATEGORY DROPDOWN */}
-            {hovered === index && c.subCategories?.length > 0 && (
-              <div className="absolute top-16 bg-black border border-gray-700 rounded shadow-lg p-2 z-50 min-w-[150px]">
-                {c.subCategories.map((sub, i) => (
+                {c.subCategories.map(sub => (
                   <div
-                    key={i}
-                    className="text-sm px-3 py-1 hover:bg-gray-800"
+                    key={sub._id}
                     onClick={(e) => {
                       e.stopPropagation()
-                      navigate(`/category/${c.name}?sub=${sub}`)
+                      navigate(`/category/${c.name}?sub=${sub.name}`)
                     }}
+                    className="px-2 py-1 hover:bg-gray-200 cursor-pointer rounded"
                   >
-                    {sub}
+                    {sub.name}
                   </div>
                 ))}
+
               </div>
             )}
           </div>
         ))}
+
       </div>
-
-      {/* MOBILE MENU */}
-      {mobileOpen && (
-        <div className="md:hidden bg-luxe-panel p-3">
-          {categories.map(c => (
-            <div
-              key={c._id}
-              className="py-2 border-b border-gray-700"
-              onClick={() => {
-                navigate(`/category/${c.name}`)
-                setMobileOpen(false)
-              }}
-            >
-              {c.name}
-            </div>
-          ))}
-        </div>
-      )}
-
-    </header>
+    </div>
   )
 }
