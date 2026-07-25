@@ -1,10 +1,3 @@
-Yeh error isliye aa raha hai kyunki aapne **`Header.jsx`** file ke andar galti se mera conversational text (Hindi explanation) copy-paste kar diya hai, jiska pehla word `Aapke` hai. Us file mein sirf JavaScript/React ka code hona chahiye, koi text ya explanation nahi.
-
-Is error ko theek karne ke liye apne `src/components/Header.jsx` file ki **sabse pehli line** par jaakar wo Hindi text hata dein, aur sirf code rakhein.
-
-Aapke liye clean aur error-free **`Header.jsx`** ka exact code niche diya gaya hai. Ise poora copy karke apni file mein paste kar dein:
-
-```jsx
 import { Search, ShoppingCart, Menu, ChevronDown, X, Heart, Sparkles } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
@@ -272,5 +265,3 @@ export default function Header() {
     </header>
   )
 }
-
-```
