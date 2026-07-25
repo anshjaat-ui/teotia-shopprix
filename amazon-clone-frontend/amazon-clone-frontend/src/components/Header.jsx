@@ -13,37 +13,30 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [suggestions, setSuggestions] = useState([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [categories, setCategories] = useState([])
+  const [parentCategories, setParentCategories] = useState([])
+  const [subCategoriesMap, setSubCategoriesMap] = useState({})
   const [activeCategory, setActiveCategory] = useState(null)
   const debounceRef = useRef(null)
   const boxRef = useRef(null)
 
   useEffect(() => {
+    // Backend se saari categories fetch karein
     api.get('/categories').then((res) => {
-      setCategories(res)
+      const allCategories = Array.isArray(res) ? res : (res.categories || [])
+      
+      // Parent (jinka parent null hai) aur Subcategories (jinka parent ObjectId hai) ko alag karein
+      const parents = allCategories.filter(c => !c.parent)
+      const subsMap = {}
+
+      parents.forEach(p => {
+        subsMap[p._id] = allCategories.filter(c => c.parent && c.parent.toString() === p._id.toString())
+      })
+
+      setParentCategories(parents)
+      setSubCategoriesMap(subsMap)
     }).catch(() => {
-      setCategories([
-        { 
-          _id: '1', name: 'Stationery', emoji: '📚', 
-          gradient: 'from-blue-600 to-indigo-500',
-          subcategories: ['Books', 'Notebooks', 'Pens & Pencils', 'Geometry Box'] 
-        },
-        { 
-          _id: '2', name: 'Pharmacy', emoji: '💊', 
-          gradient: 'from-emerald-600 to-teal-400',
-          subcategories: ['Medicines', 'Wellness Kits', 'First Aid', 'Vitamins'] 
-        },
-        { 
-          _id: '3', name: 'Doctors Care', emoji: '👨‍⚕️', 
-          gradient: 'from-orange-500 to-amber-400',
-          subcategories: ['Consultation', 'Skin Care', 'Hair Growth', 'Weight Management'] 
-        },
-        { 
-          _id: '4', name: 'Lab Tests', emoji: '🧪', 
-          gradient: 'from-purple-600 to-pink-500',
-          subcategories: ['Full Body Checkup', 'Blood Test', 'Diabetes Panel', 'Thyroid'] 
-        }
-      ])
+      setParentCategories([])
+      setSubCategoriesMap({})
     })
   }, [])
 
@@ -88,6 +81,15 @@ export default function Header() {
     setKeyword('')
     navigate(`/product/${p._id}`)
   }
+
+  // Vibrant gradients category ke liye lookup
+  const gradients = [
+    'from-blue-600 to-indigo-500',
+    'from-emerald-600 to-teal-400',
+    'from-orange-500 to-amber-400',
+    'from-purple-600 to-pink-500',
+    'from-rose-600 to-red-500'
+  ]
 
   return (
     <header className="sticky top-0 z-50 font-sans bg-luxe-bg border-b border-gold/30 shadow-md">
@@ -187,45 +189,51 @@ export default function Header() {
         </button>
       </form>
 
+      {/* Colorful Parent Categories & Sub-Categories Dropdown */}
       <div className="hidden md:flex items-center justify-center gap-4 px-4 py-2.5 border-t border-gold/10 overflow-x-auto bg-black/40">
-        {categories.map((c) => (
-          <div 
-            key={c._id} 
-            className="relative group cursor-pointer"
-            onMouseEnter={() => setActiveCategory(c._id)}
-            onMouseLeave={() => setActiveCategory(null)}
-          >
-            <div
-              onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
-              className={`flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gradient-to-r ${c.gradient || 'from-blue-600 to-indigo-600'} text-white shadow-md hover:scale-105 transition-all duration-300 whitespace-nowrap`}
-            >
-              <span className="text-base bg-black/20 p-1.5 rounded-lg">{c.emoji}</span>
-              <span className="text-xs font-bold tracking-wide">{c.name}</span>
-              {c.subcategories && c.subcategories.length > 0 && <ChevronDown size={14} className="opacity-80" />}
-            </div>
+        {parentCategories.map((c, index) => {
+          const subcategories = subCategoriesMap[c._id] || []
+          const gradientClass = gradients[index % gradients.length]
 
-            {c.subcategories && c.subcategories.length > 0 && activeCategory === c._id && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-md">
-                <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold border-b border-gold/20 mb-1">
-                  {c.name} Options
-                </div>
-                {c.subcategories.map((sub, idx) => (
-                  <div
-                    key={idx}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/?category=${encodeURIComponent(c.name)}&subcategory=${encodeURIComponent(sub)}`);
-                      setActiveCategory(null);
-                    }}
-                    className="px-4 py-2 text-xs text-gray-200 hover:bg-gold/20 hover:text-gold transition-colors flex items-center justify-between"
-                  >
-                    <span>{sub}</span>
-                  </div>
-                ))}
+          return (
+            <div 
+              key={c._id} 
+              className="relative group cursor-pointer"
+              onMouseEnter={() => setActiveCategory(c._id)}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <div
+                onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gradient-to-r ${gradientClass} text-white shadow-md hover:scale-105 transition-all duration-300 whitespace-nowrap`}
+              >
+                <span className="text-base bg-black/20 p-1.5 rounded-lg">{c.emoji || '🛍️'}</span>
+                <span className="text-xs font-bold tracking-wide">{c.name}</span>
+                {subcategories.length > 0 && <ChevronDown size={14} className="opacity-80" />}
               </div>
-            )}
-          </div>
-        ))}
+
+              {subcategories.length > 0 && activeCategory === c._id && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-md">
+                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold border-b border-gold/20 mb-1">
+                    {c.name} Options
+                  </div>
+                  {subcategories.map((sub) => (
+                    <div
+                      key={sub._id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/?category=${encodeURIComponent(c.name)}&subcategory=${encodeURIComponent(sub.name)}`);
+                        setActiveCategory(null);
+                      }}
+                      className="px-4 py-2 text-xs text-gray-200 hover:bg-gold/20 hover:text-gold transition-colors flex items-center justify-between"
+                    >
+                      <span>{sub.name}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
 
       {mobileOpen && (
@@ -248,13 +256,13 @@ export default function Header() {
           <div>
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Explore Categories</p>
             <div className="grid grid-cols-2 gap-2">
-              {categories.map((c) => (
+              {parentCategories.map((c, index) => (
                 <div
                   key={c._id}
                   onClick={() => { navigate(`/?category=${encodeURIComponent(c.name)}`); setMobileOpen(false); }}
-                  className={`flex items-center gap-2 p-2.5 rounded-xl bg-gradient-to-r ${c.gradient || 'from-blue-600 to-indigo-600'} text-white cursor-pointer shadow`}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl bg-gradient-to-r ${gradients[index % gradients.length]} text-white cursor-pointer shadow`}
                 >
-                  <span className="text-sm">{c.emoji}</span>
+                  <span className="text-sm">{c.emoji || '🛍️'}</span>
                   <span className="text-xs font-bold truncate">{c.name}</span>
                 </div>
               ))}
