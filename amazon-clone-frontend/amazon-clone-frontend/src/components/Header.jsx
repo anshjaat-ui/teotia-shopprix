@@ -29,7 +29,12 @@ export default function Header() {
       const subsMap = {}
 
       parents.forEach(p => {
-        subsMap[p._id] = allCategories.filter(c => c.parent && c.parent.toString() === p._id.toString())
+        const pIdStr = p._id?.toString() || p._id
+        subsMap[pIdStr] = allCategories.filter(c => {
+          if (!c.parent) return false
+          const cParentStr = typeof c.parent === 'object' ? (c.parent._id?.toString() || c.parent.toString()) : c.parent.toString()
+          return cParentStr === pIdStr
+        })
       })
 
       setParentCategories(parents)
@@ -192,39 +197,47 @@ export default function Header() {
       {/* Colorful Parent Categories & Sub-Categories Dropdown */}
       <div className="hidden md:flex items-center justify-center gap-4 px-4 py-2.5 border-t border-gold/10 overflow-x-auto bg-black/40">
         {parentCategories.map((c, index) => {
-          const subcategories = subCategoriesMap[c._id] || []
+          const categoryIdStr = c._id?.toString() || c._id
+          const subcategories = subCategoriesMap[categoryIdStr] || []
           const gradientClass = gradients[index % gradients.length]
+          const isOpen = activeCategory === categoryIdStr
 
           return (
             <div 
-              key={c._id} 
+              key={categoryIdStr} 
               className="relative group cursor-pointer"
-              onMouseEnter={() => setActiveCategory(c._id)}
+              onMouseEnter={() => setActiveCategory(categoryIdStr)}
               onMouseLeave={() => setActiveCategory(null)}
             >
               <div
-                onClick={() => navigate(`/?category=${encodeURIComponent(c.name)}`)}
+                onClick={() => {
+                  if (subcategories.length > 0) {
+                    setActiveCategory(isOpen ? null : categoryIdStr)
+                  } else {
+                    navigate(`/?category=${encodeURIComponent(c.name)}`)
+                  }
+                }}
                 className={`flex items-center gap-2.5 px-4 py-2 rounded-xl bg-gradient-to-r ${gradientClass} text-white shadow-md hover:scale-105 transition-all duration-300 whitespace-nowrap`}
               >
                 <span className="text-base bg-black/20 p-1.5 rounded-lg">{c.emoji || '🛍️'}</span>
                 <span className="text-xs font-bold tracking-wide">{c.name}</span>
-                {subcategories.length > 0 && <ChevronDown size={14} className="opacity-80" />}
+                {subcategories.length > 0 && <ChevronDown size={14} className={`opacity-85 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />}
               </div>
 
-              {subcategories.length > 0 && activeCategory === c._id && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-md">
+              {subcategories.length > 0 && isOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-luxe-panel border border-gold/40 rounded-xl shadow-2xl py-2 z-[999] backdrop-blur-md">
                   <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold border-b border-gold/20 mb-1">
                     {c.name} Options
                   </div>
                   {subcategories.map((sub) => (
                     <div
-                      key={sub._id}
+                      key={sub._id?.toString() || sub._id}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/?category=${encodeURIComponent(c.name)}&subcategory=${encodeURIComponent(sub.name)}`);
                         setActiveCategory(null);
                       }}
-                      className="px-4 py-2 text-xs text-gray-200 hover:bg-gold/20 hover:text-gold transition-colors flex items-center justify-between"
+                      className="px-4 py-2 text-xs text-gray-200 hover:bg-gold/20 hover:text-gold transition-colors flex items-center justify-between cursor-pointer"
                     >
                       <span>{sub.name}</span>
                     </div>
