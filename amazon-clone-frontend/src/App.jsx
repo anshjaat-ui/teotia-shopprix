@@ -66,6 +66,7 @@ function Layout() {
           }
         />
         <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/schemes" element={<Schemes />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/press" element={<PressReleases />} />
