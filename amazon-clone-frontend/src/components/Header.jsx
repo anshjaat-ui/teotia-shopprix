@@ -71,7 +71,7 @@ export default function Header() {
 
         <Link to="/" className="flex items-center shrink-0">
           <span className="text-lg sm:text-2xl font-bold tracking-wide text-gold whitespace-nowrap drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]">
-            Teotia Shopprix
+            Shopprix
           </span>
         </Link>
 
