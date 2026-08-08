@@ -15,7 +15,7 @@ export default function Careers() {
             and share your resume for future opportunities, we'd be happy to hear from you.
           </p>
           <a
-            href="mailto:careers@teotiashopprix.com"
+            href="mailto:kpteotia@gmail.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
             <Mail size={16} /> careers@teotiashopprix.com
