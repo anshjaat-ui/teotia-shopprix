@@ -12,15 +12,15 @@ export default function ContactUs() {
         <div className="space-y-4 text-sm text-gray-300">
           <div className="flex items-center gap-3">
             <Mail size={18} className="text-gold" />
-            <span>support@teotiashopprix.com</span>
+            <span>kpteotia@gmail.com</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone size={18} className="text-gold" />
-            <span>+91-XXXXXXXXXX</span>
+            <span>+91 97725 01206</span>
           </div>
           <div className="flex items-center gap-3">
             <MapPin size={18} className="text-gold" />
-            <span>Your business address here, India</span>
+            <span>Moti kunj , Near Hanuman Nagar , Mathura</span>
           </div>
         </div>
 
