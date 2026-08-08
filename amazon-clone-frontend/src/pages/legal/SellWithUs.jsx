@@ -17,7 +17,7 @@ export default function SellWithUs() {
           </ul>
           <p>Interested in becoming a seller? Reach out to us:</p>
           <a
-            href="mailto:sellers@teotiashopprix.com"
+            href="mailto:kpteotia@gmail.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
             <Mail size={16} /> sellers@teotiashopprix.com
