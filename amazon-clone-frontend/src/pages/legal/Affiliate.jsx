@@ -12,7 +12,7 @@ export default function Affiliate() {
           </p>
           <p>Interested in joining our affiliate program? Reach out to us:</p>
           <a
-            href="mailto:affiliates@teotiashopprix.com"
+            href="mailto:kpteotia@gmail.com"
             className="inline-flex items-center gap-2 text-gold hover:underline"
           >
             <Mail size={16} /> affiliates@teotiashopprix.com
